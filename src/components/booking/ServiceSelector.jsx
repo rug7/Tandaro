@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DriverApplication, User } from "@/api/entities";
 import DriverApplicationForm from "@/pages/DriverApplicationForm";
+import { useTranslation } from "@/components/utils/translations";
 import { 
   Sofa, 
   Hammer, 
@@ -21,55 +22,43 @@ const services = [
   {
     id: 'furniture_pickup',
     icon: Sofa,
-    titleAr: 'نقل أثاث',
-    titleEn: 'Furniture Pickup',
-    descriptionAr: 'نقل الأثاث والأجهزة المنزلية',
-    descriptionEn: 'Move furniture and home appliances',
+    titleKey: 'furniture_pickup',
+    descriptionKey: 'furniture_desc',
     color: 'from-blue-500 to-blue-600'
   },
   {
     id: 'construction_tools',
     icon: Hammer,
-    titleAr: 'أدوات البناء',  
-    titleEn: 'Construction Tools',
-    descriptionAr: 'نقل أدوات ومعدات البناء',
-    descriptionEn: 'Transport construction tools and equipment',
+    titleKey: 'construction_tools',
+    descriptionKey: 'construction_desc',
     color: 'from-orange-500 to-orange-600'
   },
   {
     id: 'materials_transport',
     icon: Package2,
-    titleAr: 'نقل مواد',
-    titleEn: 'Materials Transport', 
-    descriptionAr: 'نقل الخشب، البلاط، والمواد الخام',
-    descriptionEn: 'Transport wood, tiles, and raw materials',
+    titleKey: 'materials_transport',
+    descriptionKey: 'materials_desc',
     color: 'from-green-500 to-green-600'
   },
   {
     id: 'general_delivery',
     icon: Truck,
-    titleAr: 'توصيل عام',
-    titleEn: 'General Delivery',
-    descriptionAr: 'خدمة توصيل عامة للبضائع',
-    descriptionEn: 'General goods delivery service',
+    titleKey: 'general_delivery',
+    descriptionKey: 'general_desc',
     color: 'from-purple-500 to-purple-600'
   },
   {
     id: 'office_move',
     icon: Building,
-    titleAr: 'نقل مكاتب',
-    titleEn: 'Office Move',
-    descriptionAr: 'نقل المكاتب والشركات',
-    descriptionEn: 'Office and company relocation',
+    titleKey: 'office_move',
+    descriptionKey: 'office_desc',
     color: 'from-indigo-500 to-indigo-600'
   },
   {
     id: 'other',
     icon: MoreHorizontal,
-    titleAr: 'أخرى',
-    titleEn: 'Other',
-    descriptionAr: 'خدمات نقل أخرى',
-    descriptionEn: 'Other transport services',
+    titleKey: 'other',
+    descriptionKey: 'other_desc',
     color: 'from-gray-500 to-gray-600'
   }
 ];
@@ -84,9 +73,9 @@ export default function ServiceSelector({
   const [user, setUser] = useState(null);
   const [applicationStatus, setApplicationStatus] = useState(null);
   const [showApplicationSuccess, setShowApplicationSuccess] = useState(false);
-  const [showDriverForm, setShowDriverForm] = useState(false); // Add this state
+  const [showDriverForm, setShowDriverForm] = useState(false);
   
-  const t = (ar, en) => language === 'ar' ? ar : en;
+  const { t } = useTranslation(language);
 
   useEffect(() => {
     checkUserStatus();
@@ -119,7 +108,7 @@ export default function ServiceSelector({
     try {
       // Check if user is logged in
       if (!user) {
-        toast.error(t('يرجى تسجيل الدخول أولاً', 'Please login first'));
+        toast.error(t('please_login_first'));
         return;
       }
 
@@ -130,7 +119,7 @@ export default function ServiceSelector({
       });
 
       if (existingApplications.length > 0) {
-        toast.error(t('لديك طلب قيد المراجعة بالفعل', 'You already have a pending application'));
+        toast.error(t('pending_application_exists'));
         return;
       }
 
@@ -139,7 +128,7 @@ export default function ServiceSelector({
 
     } catch (error) {
       console.error('Error checking driver application:', error);
-      toast.error(t('حدث خطأ', 'An error occurred'));
+      toast.error(t('error_occurred'));
     }
   };
 
@@ -172,10 +161,10 @@ export default function ServiceSelector({
               </div>
               <div>
                 <h4 className="text-green-800 font-semibold">
-                  {t('تم إرسال طلبك بنجاح!', 'Application Sent Successfully!')}
+                  {t('application_sent_success')}
                 </h4>
                 <p className="text-green-600 text-sm">
-                  {t('سيتم مراجعة طلبك من قبل فريق الإدارة قريباً', 'Your application will be reviewed by our admin team soon')}
+                  {t('application_review_message')}
                 </p>
               </div>
             </div>
@@ -192,10 +181,10 @@ export default function ServiceSelector({
                 </div>
                 <div className="text-center md:text-right">
                   <h3 className="text-lg font-bold text-green-800 mb-1">
-                    {t('انضم إلى فريقنا كسائق!', 'Join our team as a driver!')}
+                    {t('join_team_driver')}
                   </h3>
                   <p className="text-green-600 text-sm">
-                    {t('هل لديك مركبة وتود زيادة دخلك؟ قدم طلبك الآن', 'Do you have a vehicle and want to increase your income? Apply now')}
+                    {t('driver_income_question')}
                   </p>
                 </div>
               </div>
@@ -208,12 +197,12 @@ export default function ServiceSelector({
                 {applicationStatus === 'pending' ? (
                   <>
                     <CheckCircle className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                    {t('تم الإرسال', 'Submitted')}
+                    {t('submitted')}
                   </>
                 ) : (
                   <>
                     <UserPlus className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                    {t('قدم الآن', 'Apply Now')}
+                    {t('apply_now')}
                   </>
                 )}
               </Button>
@@ -223,10 +212,10 @@ export default function ServiceSelector({
 
         <div className="text-center">
           <h2 className="text-2xl font-bold text-slate-900 mb-2">
-            {t('ما نوع الخدمة التي تحتاجها؟', 'What type of service do you need?')}
+            {t('what_service_need')}
           </h2>
           <p className="text-slate-600">
-            {t('اختر نوع الخدمة المناسبة لاحتياجاتك', 'Choose the service type that fits your needs')}
+            {t('choose_service_fits')}
           </p>
         </div>
 
@@ -250,10 +239,10 @@ export default function ServiceSelector({
                     <Icon className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                    {language === 'ar' ? service.titleAr : service.titleEn}
+                    {t(service.titleKey)}
                   </h3>
                   <p className="text-sm text-slate-600">
-                    {language === 'ar' ? service.descriptionAr : service.descriptionEn}
+                    {t(service.descriptionKey)}
                   </p>
                   
                   {isSelected && (
@@ -269,7 +258,7 @@ export default function ServiceSelector({
           })}
         </div>
 
-                {/* Next button for regular services */}
+        {/* Next button for regular services */}
         {selectedService && (
           <div className="flex justify-center">
             <Button
@@ -278,7 +267,7 @@ export default function ServiceSelector({
               className="px-8 py-3 gradient-red text-white hover:opacity-90 disabled:opacity-50"
               size="lg"
             >
-              <span>{t('التالي', 'Next')}</span>
+              <span>{t('next')}</span>
               <ArrowRight className="w-5 h-5 ml-2 rtl:mr-2 rtl:ml-0 rtl:rotate-180" />
             </Button>
           </div>

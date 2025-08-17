@@ -6,6 +6,7 @@ import { createPageUrl } from "@/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
+import { useTranslation } from "@/components/utils/translations";
 
 import { 
   Calendar, 
@@ -24,8 +25,7 @@ import BookingConfirmation from "../components/booking/BookingConfirmation";
 
 export default function Booking() {
   const [user, setUser] = useState(null);
-    const { toast } = useToast();
-
+  const { toast } = useToast();
   const [language, setLanguage] = useState('ar');
   const [currentStep, setCurrentStep] = useState(1);
   const [bookingData, setBookingData] = useState({
@@ -39,6 +39,8 @@ export default function Booking() {
   });
   const [vehicles, setVehicles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { t } = useTranslation(language);
 
   useEffect(() => {
     loadUserAndData();
@@ -57,27 +59,25 @@ export default function Booking() {
     }
   };
 
-  const t = (ar, en) => language === 'ar' ? ar : en;
-
   const steps = [
     { 
       number: 1, 
-      title: t('نوع الخدمة', 'Service Type'), 
+      title: t('step_service_type'), 
       icon: Package 
     },
     { 
       number: 2, 
-      title: t('اختيار المركبة', 'Vehicle Selection'), 
+      title: t('step_vehicle_selection'), 
       icon: Truck 
     },
     { 
       number: 3, 
-      title: t('التاريخ والوقت', 'Date & Time'), 
+      title: t('step_date_time'), 
       icon: Calendar 
     },
     { 
       number: 4, 
-      title: t('تأكيد الحجز', 'Confirmation'), 
+      title: t('step_confirmation'), 
       icon: CheckCircle 
     }
   ];
@@ -85,11 +85,13 @@ export default function Booking() {
   const updateBookingData = (newData) => {
     setBookingData(prev => ({ ...prev, ...newData }));
   };
+
   const getProgressWidth = () => {
     if (currentStep === 1) return '0%';
     if (currentStep === steps.length) return '100%';
     return `${((currentStep - 1) / (steps.length - 1)) * 100}%`;
   };
+
   const handleNextStep = () => {
     if (currentStep < 4) {
       setCurrentStep(prev => prev + 1);
@@ -115,15 +117,15 @@ export default function Booking() {
         );
       case 2:
         return (
-    <VehicleSelector
-      language={language}
-      vehicles={vehicles}
-      selectedVehicle={vehicles.find(v => v.id === bookingData.vehicle_id)}
-      onVehicleSelect={(vehicle) => updateBookingData({ vehicle_id: vehicle.id })}
-      onNext={handleNextStep}
-      onBack={handlePrevStep}
-    />
-  );
+          <VehicleSelector
+            language={language}
+            vehicles={vehicles}
+            selectedVehicle={vehicles.find(v => v.id === bookingData.vehicle_id)}
+            onVehicleSelect={(vehicle) => updateBookingData({ vehicle_id: vehicle.id })}
+            onNext={handleNextStep}
+            onBack={handlePrevStep}
+          />
+        );
       case 3:
         return (
           <DateTimeSelector
@@ -152,74 +154,74 @@ export default function Booking() {
     }
   };
 
-const handleBookingConfirm = async (finalData) => {
-  setIsLoading(true);
-  try {
-    const selectedVehicle = vehicles.find(v => v.id === bookingData.vehicle_id);
-    
-    // Check if vehicle is already booked for this time
-    const existingReservations = await Reservation.filter({
-      vehicle_id: selectedVehicle.id,
-      status: ['pending', 'confirmed', 'in_progress']
-    });
+  const handleBookingConfirm = async (finalData) => {
+    setIsLoading(true);
+    try {
+      const selectedVehicle = vehicles.find(v => v.id === bookingData.vehicle_id);
+      
+      // Check if vehicle is already booked for this time
+      const existingReservations = await Reservation.filter({
+        vehicle_id: selectedVehicle.id,
+        status: ['pending', 'confirmed', 'in_progress']
+      });
 
-    const startDateTime = new Date(finalData.start_datetime);
-    const endDateTime = new Date(startDateTime.getTime() + (finalData.duration_hours * 60 * 60 * 1000));
+      const startDateTime = new Date(finalData.start_datetime);
+      const endDateTime = new Date(startDateTime.getTime() + (finalData.duration_hours * 60 * 60 * 1000));
 
-    const hasOverlap = existingReservations.some(res => {
-      const resStart = new Date(res.start_datetime);
-      const resEnd = new Date(resStart.getTime() + (res.duration_hours * 60 * 60 * 1000));
-      return (startDateTime < resEnd && endDateTime > resStart);
-    });
+      const hasOverlap = existingReservations.some(res => {
+        const resStart = new Date(res.start_datetime);
+        const resEnd = new Date(resStart.getTime() + (res.duration_hours * 60 * 60 * 1000));
+        return (startDateTime < resEnd && endDateTime > resStart);
+      });
 
-    if (hasOverlap) {
-      throw new Error(t('This time slot is already booked'));
+      if (hasOverlap) {
+        throw new Error(t('time_slot_booked'));
+      }
+
+      const reservationData = {
+        ...finalData,
+        user_id: user.id,
+        user_name: user.full_name,
+        user_phone: user.phone,
+        vehicle_id: selectedVehicle.id,
+        price_per_hour: selectedVehicle.price_per_hour,
+        total_amount: selectedVehicle.price_per_hour * finalData.duration_hours,
+        status: 'pending',
+        payment_status: 'unpaid',
+        created_at: new Date().toISOString()
+      };
+
+      await Reservation.create(reservationData);
+
+      toast({
+        title: t('booking_confirmed_success'),
+        variant: "success"
+      });
+
+      // Redirect to reservations page
+      window.location.href = createPageUrl("MyReservations");
+    } catch (error) {
+      console.error('Error creating reservation:', error);
+      toast({
+        title: t('booking_error'),
+        description: error.message,
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const reservationData = {
-      ...finalData,
-      user_id: user.id,
-      user_name: user.full_name,
-      user_phone: user.phone,
-      vehicle_id: selectedVehicle.id,
-      price_per_hour: selectedVehicle.price_per_hour,
-      total_amount: selectedVehicle.price_per_hour * finalData.duration_hours,
-      status: 'pending',
-      payment_status: 'unpaid',
-      created_at: new Date().toISOString()
-    };
-
-    await Reservation.create(reservationData);
-
-    toast({
-      title: t('Booking confirmed successfully'),
-      variant: "success"
-    });
-
-    // Redirect to reservations page
-    window.location.href = createPageUrl("MyReservations");
-  } catch (error) {
-    console.error('Error creating reservation:', error);
-    toast({
-      title: t('Booking error'),
-      description: error.message,
-      variant: "destructive"
-    });
-  } finally {
-    setIsLoading(false);
-  }
-};
-
- return (
+  return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-slate-900 mb-2">
-            {t('احجز مركبتك الآن', 'Book Your Vehicle Now')}
+            {t('book_vehicle_now')}
           </h1>
           <p className="text-slate-600">
-            {t('خدمة توصيل سريعة وموثوقة', 'Fast and reliable delivery service')}
+            {t('fast_reliable_service')}
           </p>
         </div>
 

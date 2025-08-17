@@ -10,6 +10,7 @@ export const translations = {
   materials_transport: { ar: 'نقل مواد', he: 'הובלת חומרים', en: 'Materials Transport' },
   general_delivery: { ar: 'توصيل عام', he: 'משלוח כללי', en: 'General Delivery' },
   office_move: { ar: 'نقل مكاتب', he: 'העברת משרדים', en: 'Office Move' },
+  
   other: { ar: 'أخرى', he: 'אחר', en: 'Other' },
    // Vehicle Selection
   choose_vehicle: { ar: 'اختر المركبة المناسبة', he: 'בחר את הרכב המתאים', en: 'Choose the Right Vehicle' },
@@ -83,7 +84,50 @@ export const translations = {
   customer_approval: { ar: 'موافقة العميل', he: 'אישור לקוח', en: 'Customer Approval' },
   
   // Help
-  help_whatsapp: { ar: 'للمساعدة: واتساب', he: 'לעזרה: WhatsApp', en: 'For help: WhatsApp' }
+  help_whatsapp: { ar: 'للمساعدة: واتساب', he: 'לעזרה: WhatsApp', en: 'For help: WhatsApp' },
+
+   // Service Selector
+  what_service_need: { ar: 'ما نوع الخدمة التي تحتاجها؟', he: 'איזה סוג שירות אתה צריך?', en: 'What type of service do you need?' },
+  choose_service_fits: { ar: 'اختر نوع الخدمة المناسبة لاحتياجاتك', he: 'בחר את סוג השירות המתאים לצרכים שלך', en: 'Choose the service type that fits your needs' },
+  
+  // Service Descriptions
+  furniture_desc: { ar: 'نقل الأثاث والأجهزة المنزلية', he: 'העברת רהיטים ומכשירי בית', en: 'Move furniture and home appliances' },
+  construction_desc: { ar: 'نقل أدوات ومعدات البناء', he: 'הובלת כלים וציוד בנייה', en: 'Transport construction tools and equipment' },
+  materials_desc: { ar: 'نقل الخشب، البلاط، والمواد الخام', he: 'הובלת עץ, אריחים וחומרי גלם', en: 'Transport wood, tiles, and raw materials' },
+  general_desc: { ar: 'خدمة توصيل عامة للبضائع', he: 'שירות משלוח כללי לסחורות', en: 'General goods delivery service' },
+  office_desc: { ar: 'نقل المكاتب والشركات', he: 'העברת משרדים וחברות', en: 'Office and company relocation' },
+  other_desc: { ar: 'خدمات نقل أخرى', he: 'שירותי הובלה אחרים', en: 'Other transport services' },
+  
+  // Driver Application
+  join_team_driver: { ar: 'انضم إلى فريقنا كسائق!', he: 'הצטרף לצוות שלנו כנהג!', en: 'Join our team as a driver!' },
+  driver_income_question: { ar: 'هل لديك مركبة وتود زيادة دخلك؟ قدم طلبك الآن', he: 'יש לך רכב ורוצה להגדיל את ההכנסה? הגש בקשה עכשיו', en: 'Do you have a vehicle and want to increase your income? Apply now' },
+  apply_now: { ar: 'قدم الآن', he: 'הגש עכשיו', en: 'Apply Now' },
+  submitted: { ar: 'تم الإرسال', he: 'נשלח', en: 'Submitted' },
+  application_sent_success: { ar: 'تم إرسال طلبك بنجاح!', he: 'הבקשה נשלחה בהצלחה!', en: 'Application Sent Successfully!' },
+  application_review_message: { ar: 'سيتم مراجعة طلبك من قبل فريق الإدارة قريباً', he: 'הבקשה שלך תיבדק על ידי צוות הניהול בקרוב', en: 'Your application will be reviewed by our admin team soon' },
+  
+  // Error Messages
+  please_login_first: { ar: 'يرجى تسجيل الدخول أولاً', he: 'אנא התחבר תחילה', en: 'Please login first' },
+  pending_application_exists: { ar: 'لديك طلب قيد المراجعة بالفعل', he: 'יש לך בקשה ממתינה כבר', en: 'You already have a pending application' },
+  error_occurred: { ar: 'حدث خطأ', he: 'אירעה שגיאה', en: 'An error occurred' },
+   book_vehicle_now: { ar: 'احجز مركبتك الآن', he: 'הזמן את הרכב שלך עכשיו', en: 'Book Your Vehicle Now' },
+  fast_reliable_service: { ar: 'خدمة توصيل سريعة وموثوقة', he: 'שירות משלוחים מהיר ואמין', en: 'Fast and reliable delivery service' },
+  
+  // Booking Steps
+  step_service_type: { ar: 'نوع الخدمة', he: 'סוג השירות', en: 'Service Type' },
+  step_vehicle_selection: { ar: 'اختيار المركبة', he: 'בחירת רכב', en: 'Vehicle Selection' },
+  step_date_time: { ar: 'التاريخ والوقت', he: 'תاריך ושעה', en: 'Date & Time' },
+  step_confirmation: { ar: 'تأكيد الحجز', he: 'אישור הזמנה', en: 'Confirmation' },
+  
+  // Booking Messages
+  booking_confirmed_success: { ar: 'تم تأكيد الحجز بنجاح', he: 'ההזמנה אושרה בהצלחה', en: 'Booking confirmed successfully' },
+  booking_error: { ar: 'خطأ في الحجز', he: 'שגיאת הזמנה', en: 'Booking error' },
+  time_slot_booked: { ar: 'هذا الموعد محجوز بالفعل', he: 'זמן זה כבר תפוס', en: 'This time slot is already booked' },
+  
+  // Progress Labels
+  progress_complete: { ar: 'مكتمل', he: 'הושלם', en: 'Complete' },
+  progress_current: { ar: 'الحالي', he: 'נוכחי', en: 'Current' },
+  progress_pending: { ar: 'في الانتظار', he: 'ממتין', en: 'Pending' },
 };
 
 export const useTranslation = (language = 'ar') => {
