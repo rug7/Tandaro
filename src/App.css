@@ -1,0 +1,287 @@
+.vehicle-card {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.vehicle-image-container {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.vehicle-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vehicle-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.7) 100%);
+  padding: 20px;
+  color: white;
+}
+
+.availability-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background-color: #10B981;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 14px;
+}
+
+.vehicle-info {
+  padding: 16px;
+  background: white;
+}
+
+.price-tag {
+  font-size: 24px;
+  font-weight: bold;
+  color: #EF4444;
+}
+/* Add to your CSS */
+.gradient-tandaro {
+  background: linear-gradient(135deg, #EF4444 0%, #F59E0B 100%);
+}
+
+.shadow-premium {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+              0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Optional: Add smooth scrolling for the whole app */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Optional: Add transition for all elements */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+.vehicle-card {
+  @apply bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-200;
+}
+
+.vehicle-card:hover {
+  @apply transform -translate-y-1 shadow-lg;
+}
+
+.vehicle-image-container {
+  @apply relative h-48 overflow-hidden;
+}
+
+.vehicle-image {
+  @apply w-full h-full object-cover;
+}
+
+.vehicle-overlay {
+  @apply absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent text-white;
+}
+
+.availability-badge {
+  @apply absolute top-4 right-4 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-semibold;
+}
+
+.vehicle-info {
+  @apply p-4;
+}
+
+.price-tag {
+  @apply text-lg font-bold text-gray-900;
+}
+.vehicle-card {
+  @apply bg-white rounded-xl border border-gray-200 overflow-hidden transition-all duration-200 hover:shadow-lg;
+}
+
+.vehicle-card:hover {
+  @apply transform -translate-y-1;
+}
+
+.vehicle-image-container {
+  @apply relative h-48 overflow-hidden;
+}
+
+.vehicle-info {
+  @apply p-4;
+}
+
+ /* Modern Background Animations */
+  @keyframes logo-breathe-modern {
+    0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.08; }
+    50% { transform: scale(1.05) rotate(0.5deg); opacity: 0.12; }
+  }
+  
+  @keyframes modern-float {
+    0%, 100% { 
+      transform: translateY(0px) translateX(0px) rotate(0deg) scale(1); 
+      opacity: 0.12; 
+    }
+    25% { 
+      transform: translateY(-40px) translateX(20px) rotate(10deg) scale(1.1); 
+      opacity: 0.16; 
+    }
+    50% { 
+      transform: translateY(-20px) translateX(40px) rotate(-5deg) scale(0.9); 
+      opacity: 0.08; 
+    }
+    75% { 
+      transform: translateY(-60px) translateX(10px) rotate(15deg) scale(1.05); 
+      opacity: 0.14; 
+    }
+  }
+  
+  @keyframes modern-shape-1 {
+    0%, 100% { 
+      transform: translateY(0px) translateX(0px) scale(1); 
+      opacity: 0.15; 
+    }
+    50% { 
+      transform: translateY(-60px) translateX(40px) scale(1.2); 
+      opacity: 0.25; 
+    }
+  }
+  
+  @keyframes modern-shape-2 {
+    0%, 100% { 
+      transform: translateY(0px) translateX(0px) rotate(45deg) scale(1); 
+      opacity: 0.12; 
+    }
+    50% { 
+      transform: translateY(-50px) translateX(-30px) rotate(75deg) scale(0.8); 
+      opacity: 0.20; 
+    }
+  }
+  
+  @keyframes modern-shape-3 {
+    0%, 100% { 
+      transform: translateY(0px) translateX(0px) scale(1); 
+      opacity: 0.10; 
+    }
+    50% { 
+      transform: translateY(-45px) translateX(35px) scale(1.15); 
+      opacity: 0.18; 
+    }
+  }
+  
+  @keyframes modern-shape-4 {
+    0%, 100% { 
+      transform: translateY(0px) translateX(0px) rotate(12deg) scale(1); 
+      opacity: 0.08; 
+    }
+    50% { 
+      transform: translateY(-55px) translateX(-25px) rotate(35deg) scale(1.25); 
+      opacity: 0.15; 
+    }
+  }
+  
+  @keyframes particle-modern {
+    0% { 
+      transform: translateY(100vh) translateX(0px) rotate(0deg); 
+      opacity: 0; 
+    }
+    10% { opacity: 0.3; }
+    90% { opacity: 0.3; }
+    100% { 
+      transform: translateY(-10vh) translateX(100px) rotate(360deg); 
+      opacity: 0; 
+    }
+  }
+  
+  /* Animation Classes */
+  .animate-logo-breathe-modern { animation: logo-breathe-modern 16s ease-in-out infinite; }
+  .animate-modern-float { animation: modern-float ease-in-out infinite; }
+  .animate-modern-shape-1 { animation: modern-shape-1 20s ease-in-out infinite; }
+  .animate-modern-shape-2 { animation: modern-shape-2 24s ease-in-out infinite 4s; }
+    .animate-modern-shape-3 { animation: modern-shape-3 18s ease-in-out infinite 8s; }
+  .animate-modern-shape-4 { animation: modern-shape-4 22s ease-in-out infinite 12s; }
+  .animate-particle-modern { animation: particle-modern linear infinite; }
+  
+  /* Premium Shadows */
+  .shadow-3xl {
+    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+  }
+   .animate-modern-shape-3 { animation: modern-shape-3 18s ease-in-out infinite 8s; }
+  .animate-modern-shape-4 { animation: modern-shape-4 22s ease-in-out infinite 12s; }
+  .animate-particle-modern { animation: particle-modern linear infinite; }
+  
+  /* Premium Modern Effects */
+  .shadow-3xl {
+    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25),
+                0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+  
+  /* Enhanced Backdrop Blur */
+  .backdrop-blur-md {
+    backdrop-filter: blur(12px) saturate(180%) brightness(110%);
+  }
+  
+  /* Modern Gradient Overlays */
+  .bg-gradient-modern {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  }
+  
+  /* Smooth Transitions */
+  .transition-modern {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Responsive Optimizations */
+  @media (max-width: 768px) {
+    .animate-modern-float {
+      animation-duration: 8s;
+    }
+    
+    .animate-logo-breathe-modern {
+      animation-duration: 12s;
+    }
+  }
+  
+  /* Performance Optimizations */
+  .animate-modern-float,
+  .animate-logo-breathe-modern,
+  .animate-modern-shape-1,
+  .animate-modern-shape-2,
+  .animate-modern-shape-3,
+  .animate-modern-shape-4 {
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
+  }
+  
+  /* Accessibility Respect */
+  @media (prefers-reduced-motion: reduce) {
+    .animate-modern-float,
+    .animate-logo-breathe-modern,
+    .animate-modern-shape-1,
+    .animate-modern-shape-2,
+    .animate-modern-shape-3,
+    .animate-modern-shape-4,
+    .animate-particle-modern {
+      animation: none;
+    }
+  }
+   .bg-dark-500 {
+    background-color: #374151 !important; /* Gray-700 equivalent */
+  }
+  
+  .bg-purple-500 {
+    background-color: #8B5CF6 !important;
+  }
+  
+  .bg-indigo-500 {
+    background-color: #6366F1 !important;
+  }
+  
+  .bg-gray-500 {
+    background-color: #6B7280 !important;
+  }
