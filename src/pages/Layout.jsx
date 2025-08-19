@@ -469,7 +469,7 @@ export default function Layout({ children, currentPageName }) {
               }}
             /> */}
             <img 
-              src="src\components\utils\6e2d2f5b-7eed-41c1-89c3-687c7f4f2608.jpeg" 
+              src="6e2d2f5b-7eed-41c1-89c3-687c7f4f2608.jpeg" 
               alt="" 
               className="object-contain filter grayscale-60 brightness-110 contrast-105"
               style={{

@@ -44,7 +44,6 @@ export const translations = {
   // Booking Flow
   service_type: { ar: 'نوع الخدمة', he: 'סוג השירות', en: 'Service Type' },
   vehicle_selection: { ar: 'اختيار المركبة', he: 'בחירת רכב', en: 'Vehicle Selection' },
-  date_time: { ar: 'التاريخ والوقت', he: 'תאריך ושעה', en: 'Date & Time' },
   confirmation: { ar: 'تأكيد الحجز', he: 'אישור הזמנה', en: 'Confirmation' },
   
   // Form Labels
@@ -135,7 +134,6 @@ export const translations = {
   
   // Driver Applications
   driver_applications: { ar: 'طلبات الانضمام كسائق', he: 'בקשות נהגים', en: 'Driver Applications' },
-  vehicle_information: { ar: 'معلومات المركبة', he: 'מידע על הרכב', en: 'Vehicle Information' },
   vehicle_images: { ar: 'صور المركبة', he: 'תמונות הרכב', en: 'Vehicle Images' },
   no_vehicle_images: { ar: 'لم يتم رفع صور للمركبة', he: 'לא הועלו תמונות רכב', en: 'No vehicle images uploaded' },
   
@@ -150,7 +148,6 @@ export const translations = {
   insured: { ar: 'مؤمن', he: 'מבוטח', en: 'Insured' },
   
   // Descriptions
-  vehicle_description: { ar: 'وصف المركبة', he: 'תיאור הרכב', en: 'Vehicle Description' },
   additional_notes: { ar: 'ملاحظات إضافية', he: 'הערות נוספות', en: 'Additional Notes' },
   
   // Application Actions

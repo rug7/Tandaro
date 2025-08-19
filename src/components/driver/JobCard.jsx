@@ -33,6 +33,7 @@ import { format } from "date-fns";
 import SignaturePad from "../common/SignaturePad";
 import PDFExporter from "../common/PDFExporter";
 
+
 const statusColors = {
   pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', border: 'border-yellow-200' },
   confirmed: { bg: 'bg-blue-100', text: 'text-blue-800', border: 'border-blue-200' },
@@ -51,7 +52,7 @@ export default function JobCard({ job, language, onStatusUpdate, readonly = fals
   const { t } = useTranslation(language);
   const [editingFinancials, setEditingFinancials] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [showSignaturePad, setShowSignaturePad] = useState(false);
+const [showSignaturePad, setShowSignaturePad] = useState(null);
   const [expandedView, setExpandedView] = useState(false);
 
   const [pendingChanges, setPendingChanges] = useState({});
@@ -60,7 +61,7 @@ export default function JobCard({ job, language, onStatusUpdate, readonly = fals
   const startDateTime = new Date(job.start_datetime);
   const endDateTime = new Date(startDateTime.getTime() + (job.duration_hours * 60 * 60 * 1000));
   const remainingAmount = (job.total_amount || 0) - (job.amount_paid || 0);
-
+  
   // Status update handlers
   const handleStartJob = () => {
     onStatusUpdate(job.id, 'in_progress', { started_at: new Date().toISOString() });
@@ -131,7 +132,7 @@ export default function JobCard({ job, language, onStatusUpdate, readonly = fals
 const handleSignatureSave = async (signatureUrl) => {
   setPendingChanges(prev => ({ ...prev, signature_url: signatureUrl }));
   setHasUnsavedChanges(true);
-  setShowSignaturePad(false);
+  setShowSignaturePad(null);
 };
 
   // Notes update
@@ -512,16 +513,16 @@ const handleSaveAllChanges = async () => {
                 {t('توقيع العميل', 'Customer Signature')}
               </h4>
               <Button
-                variant="outline"
-                className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
-                onClick={() => setShowSignaturePad(true)}
-              >
-                <FileSignature className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                {job.signature_url ? 
-                  t('تحديث التوقيع', 'Update Signature') : 
-                  t('إضافة توقيع', 'Add Signature')
-                }
-              </Button>
+  variant="outline"
+  className="w-full border-purple-200 text-purple-700 hover:bg-purple-50"
+  onClick={() => setShowSignaturePad(job.id)}  // ✅ Set to job ID instead of true
+>
+  <FileSignature className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+  {job.signature_url ? 
+    t('تحديث التوقيع', 'Update Signature') : 
+    t('إضافة توقيع', 'Add Signature')
+  }
+</Button>
 
               {/* Display signature */}
               {job.signature_url && (
@@ -697,14 +698,14 @@ const handleSaveAllChanges = async () => {
       </CardContent>
 
       {/* Signature Pad Modal */}
-      {showSignaturePad && (
-        <SignaturePad
-          isOpen={showSignaturePad}
-          onClose={() => setShowSignaturePad(false)}
-          onSave={handleSignatureSave}
-          language={language}
-        />
-      )}
+  {showSignaturePad && (
+  <SignaturePad
+    isOpen={!!showSignaturePad}  // ✅ Convert to boolean
+    onClose={() => setShowSignaturePad(null)}  // ✅ Set to null
+    onSave={(signatureUrl) => handleSignatureSave(signatureUrl)}
+    language={language}
+  />
+)}
     </Card>
   );
 }
