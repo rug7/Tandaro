@@ -262,12 +262,13 @@ export const translations = {
   failed_upload_images: { ar: 'فشل في رفع الصور', he: 'נכשל בהעלאת התמונות', en: 'Failed to upload images' },
   failed_submit_application: { ar: 'فشل في إرسال الطلب', he: 'נכשל בשליחת הבקשה', en: 'Failed to submit application' },
 
-  // Vehicle Types (add Hebrew)
-  pickup: { ar: 'بيك أب', he: 'טנדר', en: 'Pickup Truck' },
-  small_truck: { ar: 'شاحنة صغيرة', he: 'משאית קטנה', en: 'Small Truck' },
-  large_truck: { ar: 'شاحنة كبيرة', he: 'משאית גדולה', en: 'Large Truck' },
-  van: { ar: 'فان', he: 'טנדר', en: 'Van' },
-  other: { ar: 'أخرى', he: 'אחר', en: 'Other' }
+    new_job_assigned: { ar: 'تم تعيينك لمهمة جديدة!', he: 'הוקצתה לך משימה חדשה!', en: 'New job assigned to you!' },
+  job_notification_title: { ar: 'مهمة جديدة', he: 'משימה חדשה', en: 'New Job' },
+  view_job: { ar: 'عرض المهمة', he: 'צפה במשימה', en: 'View Job' },
+  dismiss: { ar: 'تجاهل', he: 'התעלם', en: 'Dismiss' },
+  pickup_from: { ar: 'الاستلام من', he: 'איסוף מ', en: 'Pickup from' },
+  delivery_to: { ar: 'التسليم إلى', he: 'משלוח ל', en: 'Delivery to' },
+
 };
 
 export const useTranslation = (language = 'ar') => {

@@ -4,6 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { DriverApplication, User } from "@/api/entities";
 import DriverApplicationForm from "@/pages/DriverApplicationForm";
 import { useTranslation } from "@/components/utils/translations";
+import NotificationService from "@/api/NotificationService"; // Add this import
+
 import { 
   Sofa, 
   Hammer, 
@@ -80,6 +82,15 @@ export default function ServiceSelector({
   useEffect(() => {
     checkUserStatus();
   }, []);
+  useEffect(() => {
+    checkUserStatus();
+    
+    // Request notification permission on app start
+    if ('Notification' in window) {
+      NotificationService.requestNotificationPermission();
+    }
+  }, []);
+
 
   const checkUserStatus = async () => {
     try {

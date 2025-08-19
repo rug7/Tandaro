@@ -26,6 +26,8 @@ import { format, isToday, isFuture, isPast } from "date-fns";
 import { toast } from "react-hot-toast";
 
 import JobCard from "../components/driver/JobCard";
+import NotificationService from "@/api/NotificationService"; // Add this import
+
 
 export default function DriverJobs() {
   const [user, setUser] = useState(null);
@@ -45,7 +47,30 @@ export default function DriverJobs() {
     loadData();
   }, []);
 
-  const loadData = async () => {
+   useEffect(() => {
+    if (user && user.role === 'driver') {
+      // Request notification permission
+      NotificationService.requestNotificationPermission();
+
+      // Start listening for job assignments
+      const unsubscribe = NotificationService.listenForJobAssignments(
+        user.id,
+        (newJob) => {
+          console.log('New job assigned:', newJob);
+          // Refresh the jobs list to show the new assignment
+          loadData();
+        },
+        language
+      );
+
+      // Cleanup listener when component unmounts or user changes
+      return () => {
+        NotificationService.stopListening(user.id);
+      };
+    }
+  }, [user, language]);
+
+    const loadData = async () => {
     try {
       const userData = await User.me();
       setUser(userData);
@@ -81,6 +106,7 @@ export default function DriverJobs() {
       setIsLoading(false);
     }
   };
+
 
   const handleStatusUpdate = async (jobId, newStatus, timestamps = {}) => {
     try {
@@ -231,6 +257,25 @@ export default function DriverJobs() {
               </div>
             </Card>
           </div>
+          {/* Notification Status */}
+<div className="mb-4">
+  <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+    <div className="flex items-center space-x-2 rtl:space-x-reverse">
+      <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+      <span className="text-sm text-blue-800">
+        {t('إشعارات المهام مفعلة', 'Job notifications active', 'התראות משימות פעילות')}
+      </span>
+    </div>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => NotificationService.requestNotificationPermission()}
+      className="text-blue-600 hover:bg-blue-100"
+    >
+      {t('تفعيل الإشعارات', 'Enable Notifications', 'אפשר התראות')}
+    </Button>
+  </div>
+</div>
         </div>
 
         {/* Tabs */}
