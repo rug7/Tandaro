@@ -26,7 +26,7 @@ import { format, isToday, isFuture, isPast } from "date-fns";
 import { toast } from "react-hot-toast";
 
 import JobCard from "../components/driver/JobCard";
-import NotificationService from "@/api/NotificationService"; // Add this import
+// import NotificationService from "@/api/NotificationService"; // Add this import
 
 
 export default function DriverJobs() {
@@ -47,28 +47,7 @@ export default function DriverJobs() {
     loadData();
   }, []);
 
-   useEffect(() => {
-    if (user && user.role === 'driver') {
-      // Request notification permission
-      NotificationService.requestNotificationPermission();
 
-      // Start listening for job assignments
-      const unsubscribe = NotificationService.listenForJobAssignments(
-        user.id,
-        (newJob) => {
-          console.log('New job assigned:', newJob);
-          // Refresh the jobs list to show the new assignment
-          loadData();
-        },
-        language
-      );
-
-      // Cleanup listener when component unmounts or user changes
-      return () => {
-        NotificationService.stopListening(user.id);
-      };
-    }
-  }, [user, language]);
 
     const loadData = async () => {
     try {

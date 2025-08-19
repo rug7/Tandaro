@@ -85,10 +85,10 @@ export default function ServiceSelector({
   useEffect(() => {
     checkUserStatus();
     
-    // Request notification permission on app start
-    if ('Notification' in window) {
-      NotificationService.requestNotificationPermission();
-    }
+    // // Request notification permission on app start
+    // if ('Notification' in window) {
+    //   NotificationService.requestNotificationPermission();
+    // }
   }, []);
 
 
