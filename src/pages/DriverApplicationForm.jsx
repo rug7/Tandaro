@@ -43,13 +43,13 @@ export default function DriverApplicationForm({
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
-  const vehicleTypes = [
-    { value: 'pickup', label_ar: 'بيك أب', label_en: 'Pickup Truck' },
-    { value: 'small-truck', label_ar: 'شاحنة صغيرة', label_en: 'Small Truck' },
-    { value: 'large-truck', label_ar: 'شاحنة كبيرة', label_en: 'Large Truck' },
-    { value: 'van', label_ar: 'فان', label_en: 'Van' },
-    { value: 'other', label_ar: 'أخرى', label_en: 'Other' }
-  ];
+const vehicleTypes = [
+  { value: 'pickup', label_ar: 'بيك أب', label_he: 'טנדר', label_en: 'Pickup Truck' },
+  { value: 'small-truck', label_ar: 'شاحنة صغيرة', label_he: 'משאית קטנה', label_en: 'Small Truck' },
+  { value: 'large-truck', label_ar: 'شاحنة كبيرة', label_he: 'משאית גדולה', label_en: 'Large Truck' },
+  { value: 'van', label_ar: 'فان', label_he: 'טנדר', label_en: 'Van' },
+  { value: 'other', label_ar: 'أخرى', label_he: 'אחר', label_en: 'Other' }
+];
 
   const t = (ar, en) => language === 'ar' ? ar : en;
 
@@ -280,7 +280,7 @@ export default function DriverApplicationForm({
                 <textarea
                   value={formData.vehicle_description}
                   onChange={(e) => handleInputChange('vehicle_description', e.target.value)}
-                  placeholder={t('وصف إضافي للمركبة...', 'Additional vehicle description...')}
+                  placeholder={t('وصف إضافي للمركبة: أبعاد المركبة...اضافات مثل عربة, كرفان', 'Additional vehicle description: Vehicle dimensions...extras such as a caravan, van')}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
                   rows={3}
                 />

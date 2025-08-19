@@ -11,9 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Search, 
-  Filter, 
+import {
+  Search,
+  Filter,
   UserPlus,
   UserX,
   Users,
@@ -23,7 +23,7 @@ import {
   MapPin,
   DollarSign,
   Check, // New import
-  X ,// New import
+  X,// New import
   Eye, // ADD THIS
   Image as ImageIcon // ADD THIS
 } from "lucide-react";
@@ -60,11 +60,11 @@ export default function AdminDriverPanel() {
   const [vehicles, setVehicles] = useState([]);
   const [drivers, setDrivers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // New state for driver applications
   const [driverApplications, setDriverApplications] = useState([]);
-    const [previewImage, setPreviewImage] = useState(null);
-  
+  const [previewImage, setPreviewImage] = useState(null);
+
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFilter, setDateFilter] = useState('all');
@@ -73,7 +73,7 @@ export default function AdminDriverPanel() {
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [driverFilter, setDriverFilter] = useState('all');
   const [customDateRange, setCustomDateRange] = useState({ start: '', end: '' });
-  
+
   // Selection and assignment
   const [selectedReservations, setSelectedReservations] = useState([]);
   const [showAssignDialog, setShowAssignDialog] = useState(false);
@@ -118,7 +118,7 @@ export default function AdminDriverPanel() {
   const filteredReservations = useMemo(() => {
     return reservations.filter(reservation => {
       // Search filter
-      const searchMatch = !searchTerm || 
+      const searchMatch = !searchTerm ||
         reservation.user_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         reservation.user_phone?.includes(searchTerm) ||
         reservation.pickup_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -166,7 +166,7 @@ export default function AdminDriverPanel() {
       const vehicleMatch = vehicleFilter === 'all' || reservation.vehicle_id === vehicleFilter;
       const statusMatch = statusFilter === 'all' || reservation.status === statusFilter;
       const paymentMatch = paymentFilter === 'all' || reservation.payment_status === paymentFilter;
-      const driverMatch = driverFilter === 'all' || 
+      const driverMatch = driverFilter === 'all' ||
         (driverFilter === 'unassigned' && !reservation.assigned_driver_id) ||
         (driverFilter === 'assigned' && reservation.assigned_driver_id) ||
         reservation.assigned_driver_id === driverFilter;
@@ -175,62 +175,62 @@ export default function AdminDriverPanel() {
     });
   }, [reservations, searchTerm, dateFilter, vehicleFilter, statusFilter, paymentFilter, driverFilter, customDateRange]);
 
-const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
-  try {
-    // Ensure driverPhone is not undefined
-    const phoneValue = driverPhone || null;
-    
-    const promises = reservationIds.map(id => {
-      const updateData = { 
-        assigned_driver_id: driverId,
-        updated_at: new Date().toISOString()
-      };
-      
-      // Only add assigned_driver_phone if it's not null/undefined
-      if (phoneValue !== null && phoneValue !== undefined) {
-        updateData.assigned_driver_phone = phoneValue;
-      }
-      
-      return Reservation.update(id, updateData);
-    });
-    
-    await Promise.all(promises);
-    
-    setSelectedReservations([]);
-    setShowAssignDialog(false);
-    setAssigningReservation(null);
-    
-    toast.success(t('تم تعيين السائق بنجاح', 'Driver assigned successfully'));
-    loadData(); // Refresh data
-  } catch (error) {
-    console.error('Error assigning driver:', error);
-    toast.error(t('خطأ في تعيين السائق', 'Error assigning driver'));
-  }
-};
+  const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
+    try {
+      // Ensure driverPhone is not undefined
+      const phoneValue = driverPhone || null;
+
+      const promises = reservationIds.map(id => {
+        const updateData = {
+          assigned_driver_id: driverId,
+          updated_at: new Date().toISOString()
+        };
+
+        // Only add assigned_driver_phone if it's not null/undefined
+        if (phoneValue !== null && phoneValue !== undefined) {
+          updateData.assigned_driver_phone = phoneValue;
+        }
+
+        return Reservation.update(id, updateData);
+      });
+
+      await Promise.all(promises);
+
+      setSelectedReservations([]);
+      setShowAssignDialog(false);
+      setAssigningReservation(null);
+
+      toast.success(t('driver_assigned_success'));
+      loadData(); // Refresh data
+    } catch (error) {
+      console.error('Error assigning driver:', error);
+      toast.error(t('error_assigning_driver'));
+    }
+  };
 
   const handleUnassignDriver = async (reservationId) => {
-  try {
-    const updateData = { 
-      assigned_driver_id: null,
-      updated_at: new Date().toISOString()
-    };
-    
-    // Only include assigned_driver_phone if the field exists
-    updateData.assigned_driver_phone = null;
-    
-    await Reservation.update(reservationId, updateData);
-    
-    toast.success(t('تم إلغاء تعيين السائق', 'Driver unassigned'));
-    loadData(); // Refresh data
-  } catch (error) {
-    console.error('Error unassigning driver:', error);
-    toast.error(t('خطأ في إلغاء التعيين', 'Error unassigning driver'));
-  }
-};
+    try {
+      const updateData = {
+        assigned_driver_id: null,
+        updated_at: new Date().toISOString()
+      };
+
+      // Only include assigned_driver_phone if the field exists
+      updateData.assigned_driver_phone = null;
+
+      await Reservation.update(reservationId, updateData);
+
+      toast.success(t('driver_unassigned'));
+      loadData(); // Refresh data
+    } catch (error) {
+      console.error('Error unassigning driver:', error);
+      toast.error(t('خطأ في إلغاء التعيين', 'Error unassigning driver'));
+    }
+  };
 
   const handleSelectReservation = (reservationId) => {
-    setSelectedReservations(prev => 
-      prev.includes(reservationId) 
+    setSelectedReservations(prev =>
+      prev.includes(reservationId)
         ? prev.filter(id => id !== reservationId)
         : [...prev, reservationId]
     );
@@ -253,17 +253,17 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
     try {
       // 1. Update user's role to 'driver'
       await User.update(application.user_id, { role: 'driver' });
-      
+
       // 2. Update the application status to 'approved'
       await DriverApplication.update(application.id, { status: 'approved' });
 
-      toast.success(t('تم قبول السائق بنجاح', 'Driver accepted successfully'));
+      toast.success(t('driver_accepted_success'));
 
       // 3. Refresh data to update lists (drivers and pending applications)
       loadData();
     } catch (error) {
       console.error('Error accepting driver application:', error);
-      toast.error(t('خطأ في قبول طلب السائق', 'Error accepting driver application'));
+      toast.error(t('error_accepting_driver'));
     }
   };
 
@@ -271,14 +271,14 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
     try {
       // 1. Update the application status to 'rejected'
       await DriverApplication.update(application.id, { status: 'rejected' });
-      
-      toast.success(t('تم رفض الطلب', 'Application rejected'));
+
+      toast.success(t('application_rejected'));
 
       // 2. Remove from the local state
       setDriverApplications(prev => prev.filter(app => app.id !== application.id));
     } catch (error) {
       console.error('Error rejecting driver application:', error);
-      toast.error(t('خطأ في رفض الطلب', 'Error rejecting application'));
+      toast.error(t('error_rejecting_application'));
     }
   };
 
@@ -288,7 +288,7 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-          <p className="text-gray-600 text-lg font-medium">{t('جاري التحميل...', 'Loading...')}</p>
+          <p className="text-gray-600 text-lg font-medium">{t('loading')}</p>
         </div>
       </div>
     );
@@ -302,10 +302,10 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
             <Users className="w-12 h-12 text-red-500" />
           </div>
           <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            {t('الوصول مرفوض', 'Access Denied')}
+            {t('access_denied')}
           </h2>
           <p className="text-gray-600">
-            {t('هذه الصفحة مخصصة للإداريين فقط', 'This page is for administrators only')}
+            {t('admin_only_page')}
           </p>
         </div>
       </div>
@@ -323,22 +323,22 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                {t('إدارة السائقين', 'Driver Management')}
+                {t('driver_management')}
               </h1>
               <p className="text-gray-600 mt-1">
-                {t('تعيين الحجوزات للسائقين وتتبع حالتها', 'Assign reservations to drivers and track status')}
+                {t('assign_reservations_track')}
               </p>
             </div>
           </div>
         </div>
 
         {/* Driver Applications */}
-         {/* Driver Applications */}
+        {/* Driver Applications */}
         {driverApplications.length > 0 && (
           <Card className="mb-6">
             <CardHeader>
               <h3 className="text-lg font-semibold text-gray-900">
-                {t('طلبات الانضمام كسائق', 'Driver Applications')} ({driverApplications.length})
+                {t('driver_applications')} ({driverApplications.length})
               </h3>
             </CardHeader>
             <CardContent>
@@ -366,7 +366,7 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                           onClick={() => handleAcceptApplication(app)}
                         >
                           <Check className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
-                          {t('قبول', 'Accept')}
+                          {t('accept')}
                         </Button>
                         <Button
                           size="sm"
@@ -375,7 +375,7 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                           onClick={() => handleRejectApplication(app)}
                         >
                           <X className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
-                          {t('رفض', 'Reject')}
+                          {t('reject')}
                         </Button>
                       </div>
                     </div>
@@ -386,56 +386,56 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                       <div className="space-y-3">
                         <h5 className="font-semibold text-gray-800 flex items-center">
                           <Truck className="w-4 h-4 mr-2" />
-                          {t('معلومات المركبة', 'Vehicle Information')}
+                          {t('vehicle_information')}
                         </h5>
-                        
+
                         <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                           {app.vehicle_type && (
                             <div className="flex justify-between">
-                              <span className="text-gray-600">{t('النوع', 'Type')}:</span>
+                              <span className="text-gray-600">{t('type')}:</span>
                               <span className="font-medium">
                                 {vehicleTypes.find(v => v.value === app.vehicle_type)?.[`label_${language}`] || app.vehicle_type}
                               </span>
                             </div>
                           )}
-                          
+
                           {app.vehicle_model && (
                             <div className="flex justify-between">
-                              <span className="text-gray-600">{t('الموديل', 'Model')}:</span>
+                              <span className="text-gray-600">{t('model')}:</span>
                               <span className="font-medium">{app.vehicle_model}</span>
                             </div>
                           )}
-                          
+
                           {app.vehicle_year && (
                             <div className="flex justify-between">
-                              <span className="text-gray-600">{t('السنة', 'Year')}:</span>
+                              <span className="text-gray-600">{t('year')}:</span>
                               <span className="font-medium">{app.vehicle_year}</span>
                             </div>
                           )}
-                          
+
                           {app.license_plate && (
                             <div className="flex justify-between">
-                              <span className="text-gray-600">{t('رقم اللوحة', 'License Plate')}:</span>
+                              <span className="text-gray-600">{t('license_plate')}:</span>
                               <span className="font-medium font-mono">{app.license_plate}</span>
                             </div>
                           )}
-                          
+
                           {app.experience_years && (
                             <div className="flex justify-between">
-                              <span className="text-gray-600">{t('سنوات الخبرة', 'Experience')}:</span>
-                              <span className="font-medium">{app.experience_years} {t('سنة', 'years')}</span>
+                              <span className="text-gray-600">{t('experience')}:</span>
+                              <span className="font-medium">{app.experience_years} {t('years')}</span>
                             </div>
                           )}
 
                           <div className="flex flex-wrap gap-2 mt-3">
                             {app.has_license && (
                               <Badge className="bg-green-100 text-green-800 text-xs">
-                                {t('رخصة قيادة', 'Driving License')}
+                                {t('driving_license')}
                               </Badge>
                             )}
                             {app.has_insurance && (
                               <Badge className="bg-blue-100 text-blue-800 text-xs">
-                                {t('مؤمن', 'Insured')}
+                                {t('Insured')}
                               </Badge>
                             )}
                           </div>
@@ -447,16 +447,16 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                             {app.vehicle_description && (
                               <div>
                                 <span className="text-sm font-medium text-gray-700">
-                                  {t('وصف المركبة', 'Vehicle Description')}:
+                                  {t('vehicle_description')}:
                                 </span>
                                 <p className="text-sm text-gray-600 mt-1">{app.vehicle_description}</p>
                               </div>
                             )}
-                            
+
                             {app.additional_notes && (
                               <div>
                                 <span className="text-sm font-medium text-gray-700">
-                                  {t('ملاحظات إضافية', 'Additional Notes')}:
+                                  {t('additional_notes')}:
                                 </span>
                                 <p className="text-sm text-gray-600 mt-1">{app.additional_notes}</p>
                               </div>
@@ -469,7 +469,7 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                       <div className="space-y-3">
                         <h5 className="font-semibold text-gray-800 flex items-center">
                           <ImageIcon className="w-4 h-4 mr-2" />
-                          {t('صور المركبة', 'Vehicle Images')}
+                          {t('vehicle_images')}
                           {app.vehicle_images?.length > 0 && (
                             <Badge className="ml-2 bg-blue-100 text-blue-800">
                               {app.vehicle_images.length}
@@ -510,7 +510,7 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                           <div className="text-center py-8 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
                             <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
                             <p className="text-sm text-gray-500">
-                              {t('لم يتم رفع صور للمركبة', 'No vehicle images uploaded')}
+                              {t('no_vehicle_images')}
                             </p>
                           </div>
                         )}
@@ -520,10 +520,10 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                     {/* Application Info */}
                     <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center text-sm text-gray-500">
                       <span>
-                        {t('تاريخ الطلب', 'Applied on')}: {new Date(app.created_at).toLocaleDateString()}
+                        {t('applied_on')}: {new Date(app.created_at).toLocaleDateString()}
                       </span>
                       <Badge variant="outline" className="text-xs">
-                        {t('معلق', 'Pending')}
+                        {t('pending_status')}
                       </Badge>
                     </div>
                   </div>
@@ -538,9 +538,9 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
           <CardHeader>
             <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">
-                {t('الحجوزات', 'Reservations')} ({filteredReservations.length})
+                {t('reservations')} ({filteredReservations.length})
               </h3>
-              
+
               {/* Bulk Actions */}
               {selectedReservations.length > 0 && (
                 <div className="flex gap-2">
@@ -549,20 +549,20 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                     className="gradient-red text-white"
                   >
                     <UserPlus className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
-                    {t('تعيين سائق', 'Assign Driver')} ({selectedReservations.length})
+                    {t('assign_driver')} ({selectedReservations.length})
                   </Button>
                 </div>
               )}
             </div>
           </CardHeader>
-          
+
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4">
               {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 rtl:right-3 rtl:left-auto top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
-                  placeholder={t('بحث...', 'Search...')}
+                  placeholder={t('search')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 rtl:pr-10 rtl:pl-3"
@@ -572,24 +572,24 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
               {/* Date Filter */}
               <Select value={dateFilter} onValueChange={setDateFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('التاريخ', 'Date')} />
+                  <SelectValue placeholder={t('date')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('كل التواريخ', 'All Dates')}</SelectItem>
-                  <SelectItem value="today">{t('اليوم', 'Today')}</SelectItem>
-                  <SelectItem value="week">{t('هذا الأسبوع', 'This Week')}</SelectItem>
-                  <SelectItem value="month">{t('هذا الشهر', 'This Month')}</SelectItem>
-                  <SelectItem value="custom">{t('فترة مخصصة', 'Custom Range')}</SelectItem>
+                  <SelectItem value="all">{t('all_dates')}</SelectItem>
+                  <SelectItem value="today">{t('today')}</SelectItem>
+                  <SelectItem value="week">{t('this_week')}</SelectItem>
+                  <SelectItem value="month">{t('this_month')}</SelectItem>
+                  <SelectItem value="custom">{t('custom_range')}</SelectItem>
                 </SelectContent>
               </Select>
 
               {/* Vehicle Filter */}
               <Select value={vehicleFilter} onValueChange={setVehicleFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('المركبة', 'Vehicle')} />
+                  <SelectValue placeholder={t('vehicle')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('كل المركبات', 'All Vehicles')}</SelectItem>
+                  <SelectItem value="all">{t('all_vehicles')}</SelectItem>
                   {vehicles.map(vehicle => (
                     <SelectItem key={vehicle.id} value={vehicle.id}>
                       {vehicle.name}
@@ -601,40 +601,40 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
               {/* Status Filter */}
               <Select value={statusFilter} onValueChange={setStatusFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('الحالة', 'Status')} />
+                  <SelectValue placeholder={t('status')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('كل الحالات', 'All Status')}</SelectItem>
-                  <SelectItem value="pending">{t('pending', 'Pending')}</SelectItem>
-                  <SelectItem value="confirmed">{t('confirmed', 'Confirmed')}</SelectItem>
-                  <SelectItem value="in_progress">{t('in_progress', 'In Progress')}</SelectItem>
-                  <SelectItem value="completed">{t('completed', 'Completed')}</SelectItem>
-                  <SelectItem value="cancelled">{t('cancelled', 'Cancelled')}</SelectItem>
+                  <SelectItem value="all">{t('كل الحالات')}</SelectItem>
+                  <SelectItem value="pending">{t('pending')}</SelectItem>
+                  <SelectItem value="confirmed">{t('confirmed')}</SelectItem>
+                  <SelectItem value="in_progress">{t('in_progress')}</SelectItem>
+                  <SelectItem value="completed">{t('completed')}</SelectItem>
+                  <SelectItem value="cancelled">{t('cancelled')}</SelectItem>
                 </SelectContent>
               </Select>
 
               {/* Payment Filter */}
               <Select value={paymentFilter} onValueChange={setPaymentFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('الدفع', 'Payment')} />
+                  <SelectValue placeholder={t('payment')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('كل المدفوعات', 'All Payments')}</SelectItem>
-                  <SelectItem value="unpaid">{t('unpaid', 'Unpaid')}</SelectItem>
-                  <SelectItem value="partial">{t('partial', 'Partial')}</SelectItem>
-                  <SelectItem value="paid">{t('paid', 'Paid')}</SelectItem>
+                  <SelectItem value="all">{t('كل المدفوعات')}</SelectItem>
+                  <SelectItem value="unpaid">{t('unpaid')}</SelectItem>
+                  <SelectItem value="partial">{t('partial')}</SelectItem>
+                  <SelectItem value="paid">{t('paid')}</SelectItem>
                 </SelectContent>
               </Select>
 
               {/* Driver Filter */}
               <Select value={driverFilter} onValueChange={setDriverFilter}>
                 <SelectTrigger>
-                  <SelectValue placeholder={t('السائق', 'Driver')} />
+                  <SelectValue placeholder={t('driver')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('كل السائقين', 'All Drivers')}</SelectItem>
-                  <SelectItem value="unassigned">{t('غير معيّن', 'Unassigned')}</SelectItem>
-                  <SelectItem value="assigned">{t('معيّن', 'Assigned')}</SelectItem>
+                  <SelectItem value="all">{t('all_drivers')}</SelectItem>
+                  <SelectItem value="unassigned">{t('unassigned')}</SelectItem>
+                  <SelectItem value="assigned">{t('assigned')}</SelectItem>
                   {drivers.map(driver => (
                     <SelectItem key={driver.id} value={driver.id}>
                       {driver.full_name}
@@ -644,8 +644,8 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
               </Select>
 
               {/* Clear Filters */}
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
                   setSearchTerm('');
                   setDateFilter('all');
@@ -656,7 +656,7 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                   setCustomDateRange({ start: '', end: '' });
                 }}
               >
-                {t('مسح', 'Clear')}
+                {t('clear')}
               </Button>
             </div>
 
@@ -664,7 +664,7 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
             {dateFilter === 'custom' && (
               <div className="flex gap-4 mt-4">
                 <div>
-                  <label className="text-sm text-gray-600">{t('من', 'From')}:</label>
+                  <label className="text-sm text-gray-600">{t('from')}:</label>
                   <Input
                     type="date"
                     value={customDateRange.start}
@@ -672,7 +672,7 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                   />
                 </div>
                 <div>
-                  <label className="text-sm text-gray-600">{t('إلى', 'To')}:</label>
+                  <label className="text-sm text-gray-600">{t('to')}:</label>
                   <Input
                     type="date"
                     value={customDateRange.end}
@@ -699,28 +699,28 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                       />
                     </th>
                     <th className="px-4 py-3 text-left rtl:text-right font-semibold">
-                      {t('التاريخ/الوقت', 'Date/Time')}
+                      {t('date_time')}
                     </th>
                     <th className="px-4 py-3 text-left rtl:text-right font-semibold">
-                      {t('العميل', 'Customer')}
+                      {t('customer')}
                     </th>
                     <th className="px-4 py-3 text-left rtl:text-right font-semibold">
-                      {t('المواقع', 'Locations')}
+                      {t('locations')}
                     </th>
                     <th className="px-4 py-3 text-left rtl:text-right font-semibold">
-                      {t('المركبة', 'Vehicle')}
+                      {t('vehicle')}
                     </th>
                     <th className="px-4 py-3 text-left rtl:text-right font-semibold">
-                      {t('المبلغ', 'Amount')}
+                      {t('amount')}
                     </th>
                     <th className="px-4 py-3 text-left rtl:text-right font-semibold">
-                      {t('الحالة', 'Status')}
+                      {t('status')}
                     </th>
                     <th className="px-4 py-3 text-left rtl:text-right font-semibold">
-                      {t('السائق المعيّن', 'Assigned Driver')}
+                      {t('assigned_driver')}
                     </th>
                     <th className="px-4 py-3 text-left rtl:text-right font-semibold">
-                      {t('الإجراءات', 'Actions')}
+                      {t('actions')}
                     </th>
                   </tr>
                 </thead>
@@ -728,7 +728,7 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                   {filteredReservations.map((reservation, index) => {
                     const startDateTime = new Date(reservation.start_datetime);
                     const assignedDriver = getDriverById(reservation.assigned_driver_id);
-                    
+
                     return (
                       <tr key={reservation.id} className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
                         <td className="px-4 py-3">
@@ -755,10 +755,10 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                         <td className="px-4 py-3">
                           <div className="text-sm space-y-1">
                             <div className="truncate max-w-32" title={reservation.pickup_location}>
-                              <span className="text-green-600 font-medium">{t('من', 'From')}:</span> {reservation.pickup_location}
+                              <span className="text-green-600 font-medium">{t('from')}:</span> {reservation.pickup_location}
                             </div>
                             <div className="truncate max-w-32" title={reservation.delivery_location}>
-                              <span className="text-red-600 font-medium">{t('إلى', 'To')}:</span> {reservation.delivery_location}
+                              <span className="text-red-600 font-medium">{t('to')}:</span> {reservation.delivery_location}
                             </div>
                           </div>
                         </td>
@@ -773,7 +773,7 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                         </td>
                         <td className="px-4 py-3">
                           <div className="text-sm">
-                            <div className="font-medium">{reservation.total_amount} {t('شيكل', 'NIS')}</div>
+                            <div className="font-medium">{reservation.total_amount} {t('currency')}</div>
                             <div className="text-green-600">Paid: {reservation.amount_paid || 0}</div>
                             <div className="text-red-600">Due: {(reservation.total_amount || 0) - (reservation.amount_paid || 0)}</div>
                           </div>
@@ -795,7 +795,7 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                               <div className="text-gray-500" dir="ltr">{assignedDriver.phone}</div>
                             </div>
                           ) : (
-                            <span className="text-gray-400 text-sm">{t('غير معيّن', 'Unassigned')}</span>
+                            <span className="text-gray-400 text-sm">{t('unassigned')}</span>
                           )}
                         </td>
                         <td className="px-4 py-3">
@@ -829,11 +829,11 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
                 </tbody>
               </table>
             </div>
-            
+
             {filteredReservations.length === 0 && (
               <div className="text-center py-12">
                 <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">{t('لا توجد حجوزات تطابق الفلاتر', 'No reservations match the filters')}</p>
+                <p className="text-gray-600">{t('no_reservations_match')}</p>
               </div>
             )}
           </CardContent>
@@ -851,9 +851,9 @@ const handleAssignDriver = async (reservationIds, driverId, driverPhone) => {
           onAssign={handleAssignDriver}
           language={language}
         />
-     {/* Image Preview Modal */}
+        {/* Image Preview Modal */}
         {previewImage && (
-          <div 
+          <div
             className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4"
             onClick={() => setPreviewImage(null)}
           >

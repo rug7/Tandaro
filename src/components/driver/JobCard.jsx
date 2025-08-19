@@ -54,6 +54,9 @@ export default function JobCard({ job, language, onStatusUpdate, readonly = fals
   const [showSignaturePad, setShowSignaturePad] = useState(false);
   const [expandedView, setExpandedView] = useState(false);
 
+  const [pendingChanges, setPendingChanges] = useState({});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
   const startDateTime = new Date(job.start_datetime);
   const endDateTime = new Date(startDateTime.getTime() + (job.duration_hours * 60 * 60 * 1000));
   const remainingAmount = (job.total_amount || 0) - (job.amount_paid || 0);
@@ -125,15 +128,11 @@ export default function JobCard({ job, language, onStatusUpdate, readonly = fals
   };
 
   // Signature handling
-  const handleSignatureSave = async (signatureUrl) => {
-    try {
-      await Reservation.update(job.id, { signature_url: signatureUrl });
-      setShowSignaturePad(false);
-      window.location.reload(); // Refresh to show signature
-    } catch (error) {
-      console.error('Error saving signature:', error);
-    }
-  };
+const handleSignatureSave = async (signatureUrl) => {
+  setPendingChanges(prev => ({ ...prev, signature_url: signatureUrl }));
+  setHasUnsavedChanges(true);
+  setShowSignaturePad(false);
+};
 
   // Notes update
   const updateNotes = async (notes) => {
@@ -156,6 +155,44 @@ export default function JobCard({ job, language, onStatusUpdate, readonly = fals
   const makePhoneCall = (phone) => {
     window.location.href = `tel:${phone}`;
   };
+
+const handleSaveAllChanges = async () => {
+  try {
+    const updates = { ...pendingChanges };
+    
+    // Handle payment status calculation for financial changes
+    if (updates.total_amount !== undefined || updates.amount_paid !== undefined) {
+      const total = updates.total_amount ?? job.total_amount ?? 0;
+      const paid = updates.amount_paid ?? job.amount_paid ?? 0;
+      
+      let paymentStatus = 'unpaid';
+      if (paid >= total && total > 0) {
+        paymentStatus = 'paid';
+      } else if (paid > 0) {
+        paymentStatus = 'partial';
+      }
+      updates.payment_status = paymentStatus;
+    }
+
+    // Handle status timestamps
+    if (updates.status && updates.status !== job.status) {
+      if (updates.status === 'in_progress' && job.status !== 'in_progress') {
+        updates.started_at = new Date().toISOString();
+      }
+      if (updates.status === 'completed' && job.status !== 'completed') {
+        updates.completed_at = new Date().toISOString();
+      }
+    }
+
+    await Reservation.update(job.id, updates);
+    setPendingChanges({});
+    setHasUnsavedChanges(false);
+    setEditingFinancials(false);
+    window.location.reload();
+  } catch (error) {
+    console.error('Error saving changes:', error);
+  }
+};
 
   return (
     <Card className="card-premium">
@@ -300,73 +337,102 @@ export default function JobCard({ job, language, onStatusUpdate, readonly = fals
         {/* Expanded Management View */}
         {expandedView && (
           <div className="space-y-6 pt-4 border-t border-gray-200">
-            {/* Financial Management */}
-            <div className="bg-gradient-to-br from-green-50 to-blue-50 p-5 rounded-xl">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="font-bold text-gray-900">
-                  {t('التفاصيل المالية', 'Financial Details')}
-                </h4>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setEditingFinancials(!editingFinancials)}
-                  className="p-2"
-                >
-                  {editingFinancials ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
-                </Button>
-              </div>
-              
-              {editingFinancials ? (
-                <div className="space-y-3">
-                  <Input
-                    type="number"
-                    defaultValue={job.total_amount}
-                    placeholder={t('المبلغ الإجمالي', 'Total Amount')}
-                    className="rounded-lg"
-                    id="total-amount"
-                  />
-                  <Input
-                    type="number"
-                    defaultValue={job.amount_paid || 0}
-                    placeholder={t('المبلغ المدفوع', 'Amount Paid')}
-                    className="rounded-lg"
-                    id="amount-paid"
-                  />
-                  <Button
-                    className="w-full bg-green-600 hover:bg-green-700 text-white"
-                    onClick={() => {
-                      const total = document.getElementById('total-amount').value;
-                      const paid = document.getElementById('amount-paid').value;
-                      updateFinancials(total, paid);
-                    }}
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    {t('حفظ', 'Save')}
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">{t('الإجمالي', 'Total')}</span>
-                    <span className="font-bold text-gray-900">
-                      {job.total_amount || 0} {t('شيكل', 'NIS')}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">{t('المدفوع', 'Paid')}</span>
-                    <span className="font-bold text-green-600">
-                      {job.amount_paid || 0} {t('شيكل', 'NIS')}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between pt-2 border-t">
-                    <span className="font-bold text-gray-900">{t('المتبقي', 'Remaining')}</span>
-                    <span className={`font-bold text-xl ${remainingAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                      {remainingAmount} {t('شيكل', 'NIS')}
-                    </span>
-                  </div>
-                </div>
-              )}
-            </div>
+{/* Financial Management */}
+<div className="bg-gradient-to-br from-green-50 to-blue-50 p-5 rounded-xl">
+  <div className="flex items-center justify-between mb-4">
+    <h4 className="font-bold text-gray-900">
+      {t('التفاصيل المالية', 'Financial Details')}
+    </h4>
+    <Button
+      variant="ghost"
+      size="sm"
+      onClick={() => setEditingFinancials(!editingFinancials)}
+      className="p-2"
+    >
+      {editingFinancials ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
+    </Button>
+  </div>
+  
+  {editingFinancials ? (
+    <div className="space-y-3">
+      <Input
+        type="number"
+        defaultValue={pendingChanges.total_amount ?? (job.total_amount || 0)}
+        placeholder={t('المبلغ الإجمالي', 'Total Amount')}
+        className="rounded-lg"
+        onChange={(e) => {
+          setPendingChanges(prev => ({ ...prev, total_amount: parseFloat(e.target.value) || 0 }));
+          setHasUnsavedChanges(true);
+        }}
+      />
+      <Input
+        type="number"
+        defaultValue={pendingChanges.amount_paid ?? (job.amount_paid || 0)}
+        placeholder={t('المبلغ المدفوع', 'Amount Paid')}
+        className="rounded-lg"
+        onChange={(e) => {
+          setPendingChanges(prev => ({ ...prev, amount_paid: parseFloat(e.target.value) || 0 }));
+          setHasUnsavedChanges(true);
+        }}
+      />
+    </div>
+  ) : (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-gray-600">{t('الإجمالي', 'Total')}</span>
+        <span className="font-bold text-gray-900">
+          {job.total_amount || 0} {t('شيكل', 'NIS')}
+        </span>
+      </div>
+      <div className="flex items-center justify-between">
+        <span className="text-gray-600">{t('المدفوع', 'Paid')}</span>
+        <span className="font-bold text-green-600">
+          {job.amount_paid || 0} {t('شيكل', 'NIS')}
+        </span>
+      </div>
+      <div className="flex items-center justify-between pt-2 border-t">
+        <span className="font-bold text-gray-900">{t('المتبقي', 'Remaining')}</span>
+        <span className={`font-bold text-xl ${remainingAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>
+          {remainingAmount} {t('شيكل', 'NIS')}
+        </span>
+      </div>
+    </div>
+  )}
+</div>
+{hasUnsavedChanges && (
+  <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-xl">
+    <div className="flex items-center justify-between">
+      <div className="flex items-center space-x-2 rtl:space-x-reverse">
+        <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+        <span className="text-yellow-800 font-medium">
+          {t('لديك تغييرات غير محفوظة', 'You have unsaved changes')}
+        </span>
+      </div>
+      <div className="flex space-x-2 rtl:space-x-reverse">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            setPendingChanges({});
+            setHasUnsavedChanges(false);
+            setEditingFinancials(false);
+          }}
+          className="text-gray-600 border-gray-300"
+        >
+          {t('إلغاء', 'Cancel')}
+        </Button>
+        <Button
+          size="sm"
+          onClick={handleSaveAllChanges}
+          className="bg-green-600 hover:bg-green-700 text-white"
+        >
+          <Save className="w-4 h-4 mr-2 rtl:ml-2 rtl:mr-0" />
+          {t('حفظ التغييرات', 'Save Changes')}
+        </Button>
+      </div>
+    </div>
+  </div>
+)}
 
                         {/* Status Management */}
             <div className="space-y-3">
@@ -374,19 +440,24 @@ export default function JobCard({ job, language, onStatusUpdate, readonly = fals
                 {t('إدارة الحالة', 'Status Management')}
               </h4>
               <div className="grid grid-cols-2 gap-2">
-                {['confirmed', 'in_progress', 'completed', 'cancelled'].map(status => (
-                  <Button
-                    key={status}
-                    variant={job.status === status ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => handleStatusChange(status)}
-                    className={`text-xs font-semibold ${job.status === status ? 'gradient-red text-white shadow-premium' : 'hover:bg-gray-50'}`}
-                    disabled={job.status === status}
-                  >
-                    {t(status)}
-                  </Button>
-                ))}
-              </div>
+  {['confirmed', 'in_progress', 'completed', 'cancelled'].map(status => {
+    const currentStatus = pendingChanges.status ?? job.status;
+    return (
+      <Button
+        key={status}
+        variant={currentStatus === status ? "default" : "outline"}
+        size="sm"
+        onClick={() => {
+          setPendingChanges(prev => ({ ...prev, status }));
+          setHasUnsavedChanges(true);
+        }}
+        className={`text-xs font-semibold ${currentStatus === status ? 'gradient-red text-white shadow-premium' : 'hover:bg-gray-50'}`}
+      >
+        {t(status)}
+      </Button>
+    );
+  })}
+</div>
             </div>
 
             {/* Image Upload */}
@@ -470,13 +541,18 @@ export default function JobCard({ job, language, onStatusUpdate, readonly = fals
                 {t('ملاحظات', 'Notes')}
               </h4>
               <Textarea
-                defaultValue={job.notes || ''}
-                placeholder={t('إضافة ملاحظات...', 'Add notes...')}
-                className="rounded-xl border-gray-200"
-                rows={3}
-                onBlur={(e) => updateNotes(e.target.value)}
-              />
+  defaultValue={pendingChanges.notes ?? (job.notes || '')}
+  placeholder={t('إضافة ملاحظات...', 'Add notes...')}
+  className="rounded-xl border-gray-200"
+  rows={3}
+  onChange={(e) => {
+    setPendingChanges(prev => ({ ...prev, notes: e.target.value }));
+    setHasUnsavedChanges(true);
+  }}
+/>
             </div>
+
+
 
             {/* PDF Export */}
             <div className="pt-4 border-t">

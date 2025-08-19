@@ -128,6 +128,92 @@ export const translations = {
   progress_complete: { ar: 'مكتمل', he: 'הושלם', en: 'Complete' },
   progress_current: { ar: 'الحالي', he: 'נוכחי', en: 'Current' },
   progress_pending: { ar: 'في الانتظار', he: 'ממتין', en: 'Pending' },
+
+   // Driver Management
+  driver_management: { ar: 'إدارة السائقين', he: 'ניהול נהגים', en: 'Driver Management' },
+  assign_reservations_track: { ar: 'تعيين الحجوزات للسائقين وتتبع حالتها', he: 'הקצאת הזמנות לנהגים ומעקב סטטוס', en: 'Assign reservations to drivers and track status' },
+  
+  // Driver Applications
+  driver_applications: { ar: 'طلبات الانضمام كسائق', he: 'בקשות נהגים', en: 'Driver Applications' },
+  vehicle_information: { ar: 'معلومات المركبة', he: 'מידע על הרכב', en: 'Vehicle Information' },
+  vehicle_images: { ar: 'صور المركبة', he: 'תמונות הרכב', en: 'Vehicle Images' },
+  no_vehicle_images: { ar: 'لم يتم رفع صور للمركبة', he: 'לא הועלו תמונות רכב', en: 'No vehicle images uploaded' },
+  
+  // Vehicle Details
+  type: { ar: 'النوع', he: 'סוג', en: 'Type' },
+  model: { ar: 'الموديل', he: 'דגם', en: 'Model' },
+  year: { ar: 'السنة', he: 'שנה', en: 'Year' },
+  license_plate: { ar: 'رقم اللوحة', he: 'מספר לוחית', en: 'License Plate' },
+  experience: { ar: 'سنوات الخبرة', he: 'שנות ניסיון', en: 'Experience' },
+  years: { ar: 'سنة', he: 'שנים', en: 'years' },
+  driving_license: { ar: 'رخصة قيادة', he: 'רישיון נהיגה', en: 'Driving License' },
+  insured: { ar: 'مؤمن', he: 'מבוטח', en: 'Insured' },
+  
+  // Descriptions
+  vehicle_description: { ar: 'وصف المركبة', he: 'תיאור הרכב', en: 'Vehicle Description' },
+  additional_notes: { ar: 'ملاحظات إضافية', he: 'הערות נוספות', en: 'Additional Notes' },
+  
+  // Application Actions
+  accept: { ar: 'قبول', he: 'אישור', en: 'Accept' },
+  reject: { ar: 'رفض', he: 'דחייה', en: 'Reject' },
+  pending_status: { ar: 'معلق', he: 'ממתין', en: 'Pending' },
+  applied_on: { ar: 'تاريخ الطلب', he: 'הוגש בתאריך', en: 'Applied on' },
+  
+  // Success Messages
+  driver_accepted_success: { ar: 'تم قبول السائق بنجاح', he: 'הנהג אושר בהצלחה', en: 'Driver accepted successfully' },
+  application_rejected: { ar: 'تم رفض الطلب', he: 'הבקשה נדחתה', en: 'Application rejected' },
+  driver_assigned_success: { ar: 'تم تعيين السائق بنجاح', he: 'הנהג הוקצה בהצלחה', en: 'Driver assigned successfully' },
+  driver_unassigned: { ar: 'تم إلغاء تعيين السائق', he: 'הקצאת הנהג בוטלה', en: 'Driver unassigned' },
+  
+  // Error Messages
+  error_accepting_driver: { ar: 'خطأ في قبول طلب السائق', he: 'שגיאה באישור בקשת נהג', en: 'Error accepting driver application' },
+  error_rejecting_application: { ar: 'خطأ في رفض الطلب', he: 'שגיאה בדחיית הבקשה', en: 'Error rejecting application' },
+  error_assigning_driver: { ar: 'خطأ في تعيين السائق', he: 'שגיאה בהקצאת נהג', en: 'Error assigning driver' },
+  error_unassigning: { ar: 'خطأ في إلغاء التعيين', he: 'שגיאה בביטול הקצאה', en: 'Error unassigning driver' },
+  
+  // Filters
+  all_dates: { ar: 'كل التواريخ', he: 'כל התאריכים', en: 'All Dates' },
+  today: { ar: 'اليوم', he: 'היום', en: 'Today' },
+  this_week: { ar: 'هذا الأسبوع', he: 'השבוע', en: 'This Week' },
+  this_month: { ar: 'هذا الشهر', he: 'החודש', en: 'This Month' },
+  custom_range: { ar: 'فترة مخصصة', he: 'טווח מותאם', en: 'Custom Range' },
+  
+  vehicle: { ar: 'المركبة', he: 'רכב', en: 'Vehicle' },
+  all_vehicles: { ar: 'كل المركبات', he: 'כל הרכבים', en: 'All Vehicles' },
+  status: { ar: 'الحالة', he: 'סטטוס', en: 'Status' },
+  all_status: { ar: 'كل الحالات', he: 'כל הסטטוסים', en: 'All Status' },
+  payment: { ar: 'الدفع', he: 'תשלום', en: 'Payment' },
+  all_payments: { ar: 'كل المدفوعات', he: 'כל התשלומים', en: 'All Payments' },
+  driver: { ar: 'السائق', he: 'נהג', en: 'Driver' },
+  all_drivers: { ar: 'كل السائقين', he: 'כל הנהגים', en: 'All Drivers' },
+  unassigned: { ar: 'غير معيّن', he: 'לא מוקצה', en: 'Unassigned' },
+  assigned: { ar: 'معيّن', he: 'מוקצה', en: 'Assigned' },
+  clear: { ar: 'مسح', he: 'נקה', en: 'Clear' },
+  
+  // Table Headers
+  date_time: { ar: 'التاريخ/الوقت', he: 'תאריך/שעה', en: 'Date/Time' },
+  customer: { ar: 'العميل', he: 'לקוח', en: 'Customer' },
+  locations: { ar: 'المواقع', he: 'מיקומים', en: 'Locations' },
+  amount: { ar: 'المبلغ', he: 'סכום', en: 'Amount' },
+  assigned_driver: { ar: 'السائق المعيّن', he: 'נהג מוקצה', en: 'Assigned Driver' },
+  actions: { ar: 'الإجراءات', he: 'פעולות', en: 'Actions' },
+  
+  // Bulk Actions
+  assign_driver: { ar: 'تعيين سائق', he: 'הקצה נהג', en: 'Assign Driver' },
+  
+  // Filter Ranges
+  search: { ar: 'بحث...', he: 'חיפוש...', en: 'Search...' },
+  no_reservations_match: { ar: 'لا توجد حجوزات تطابق الفلاتر', he: 'אין הזמנות התואמות למסננים', en: 'No reservations match the filters' },
+  
+  // Access Messages
+  access_denied: { ar: 'الوصول مرفوض', he: 'גישה נדחתה', en: 'Access Denied' },
+  admin_only_page: { ar: 'هذه الصفحة مخصصة للإداريين فقط', he: 'עמוד זה מיועד למנהלים בלבד', en: 'This page is for administrators only' },
+  
+  // Vehicle Types (existing but adding Hebrew)
+  pickup: { ar: 'بيك أب', he: 'טנדר', en: 'Pickup Truck' },
+  small_truck: { ar: 'شاحنة صغيرة', he: 'משאית קטנה', en: 'Small Truck' },
+  large_truck: { ar: 'شاحنة كبيرة', he: 'משאית גדולה', en: 'Large Truck' },
+  van: { ar: 'فان', he: 'טנדר', en: 'Van' },
 };
 
 export const useTranslation = (language = 'ar') => {
