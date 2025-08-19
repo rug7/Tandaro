@@ -102,7 +102,7 @@ export default function DriverApplicationForm({
       
 toast.success(t('images_uploaded_success', { count: validFiles.length }));    } catch (error) {
       console.error('Upload error:', error);
-      toast.error(t('فشل في رفع الصور', 'Failed to upload images'));
+  toast.error(t('failed_upload_images'));
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
