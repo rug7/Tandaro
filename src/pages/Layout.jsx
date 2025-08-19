@@ -458,7 +458,7 @@ export default function Layout({ children, currentPageName }) {
               animationDuration: `${12 + (i % 4) * 3}s`
             }}
           >
-            {/* <img 
+            <img 
               src="https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/object/public/base44-prod/public/2efdb0e4f_image.png" 
               alt="" 
               className="object-contain filter grayscale-60 brightness-110 contrast-105"
@@ -467,8 +467,8 @@ export default function Layout({ children, currentPageName }) {
                 height: `${20 + (i % 3) * 8}px`,
                 transform: `rotate(${i * 12}deg)`
               }}
-            /> */}
-            <img 
+            />
+            {/* <img 
               src="6e2d2f5b-7eed-41c1-89c3-687c7f4f2608.jpeg" 
               alt="" 
               className="object-contain filter grayscale-60 brightness-110 contrast-105"
@@ -477,7 +477,7 @@ export default function Layout({ children, currentPageName }) {
                 height: `${40 + (i % 3) * 8}px`,
                 transform: `rotate(${i * 12}deg)`
               }}
-            />
+            /> */}
           </div>
         ))}
       </div>
