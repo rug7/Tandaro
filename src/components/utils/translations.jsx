@@ -214,6 +214,60 @@ export const translations = {
   small_truck: { ar: 'شاحنة صغيرة', he: 'משאית קטנה', en: 'Small Truck' },
   large_truck: { ar: 'شاحنة كبيرة', he: 'משאית גדולה', en: 'Large Truck' },
   van: { ar: 'فان', he: 'טנדר', en: 'Van' },
+    driver_application: { ar: 'طلب انضمام كسائق', he: 'בקשת נהג', en: 'Driver Application' },
+  fill_details_upload: { ar: 'املأ البيانات وارفع صور المركبة', he: 'מלא פרטים והעלה תמונות רכב', en: 'Fill in the details and upload vehicle images' },
+  
+  // Vehicle Information Section
+  vehicle_information: { ar: 'معلومات المركبة', he: 'מידע על הרכב', en: 'Vehicle Information' },
+  vehicle_type: { ar: 'نوع المركبة', he: 'סוג רכב', en: 'Vehicle Type' },
+  vehicle_model: { ar: 'موديل المركبة', he: 'דגם הרכב', en: 'Vehicle Model' },
+  manufacturing_year: { ar: 'سنة الصنع', he: 'שנת ייצור', en: 'Manufacturing Year' },
+  vehicle_model_example: { ar: 'مثال: فورد ترانزيت 2020', he: 'לדוגמה: פורד טרנזיט 2020', en: 'e.g., Ford Transit 2020' },
+  enter_license_plate: { ar: 'أدخل رقم اللوحة', he: 'הכנס מספר לוחית', en: 'Enter license plate' },
+  vehicle_description: { ar: 'وصف المركبة', he: 'תיאור הרכב', en: 'Vehicle Description' },
+  vehicle_description_placeholder: { ar: 'وصف إضافي للمركبة: أبعاد المركبة...اضافات مثل عربة, كرفان', he: 'תיאור נוסף של הרכב: מידות הרכב...תוספות כמו קרון, קרוואן', en: 'Additional vehicle description: Vehicle dimensions...extras such as a caravan, van' },
+  
+  // Driver Experience Section
+  driving_experience: { ar: 'الخبرة في القيادة', he: 'ניסיון בנהיגה', en: 'Driving Experience' },
+  years_of_experience: { ar: 'سنوات الخبرة', he: 'שנות ניסיון', en: 'Years of Experience' },
+  number_of_years: { ar: 'عدد سنوات الخبرة', he: 'מספר שנים', en: 'Number of years' },
+  valid_license: { ar: 'لدي رخصة قيادة سارية', he: 'יש לי רישיון נהיגה תקף', en: 'I have a valid driving license' },
+  vehicle_insured: { ar: 'المركبة مؤمنة', he: 'הרכב מבוטח', en: 'Vehicle is insured' },
+  additional_info_share: { ar: 'أي معلومات إضافية تود مشاركتها...', he: 'כל מידע נוסף שתרצה לשתף...', en: 'Any additional information you want to share...' },
+  
+  // Vehicle Images Section
+  vehicle_images_required: { ar: 'صور المركبة *', he: 'תמונות רכב *', en: 'Vehicle Images *' },
+  upload_vehicle_images: { ar: 'ارفع صور المركبة', he: 'העלה תמונות רכב', en: 'Upload Vehicle Images' },
+  drag_images_or_click: { ar: 'اسحب الصور هنا أو انقر للاختيار', he: 'גרור תמונות לכאן או לחץ לבחירה', en: 'Drag images here or click to select' },
+  max_size_per_image: { ar: 'الحد الأقصى 5 ميجابايت لكل صورة', he: 'מקסימום 5MB לכל תמונה', en: 'Maximum 5MB per image' },
+  add_images: { ar: 'إضافة صور', he: 'הוסף תמונות', en: 'Add Images' },
+  uploading_images: { ar: 'جاري رفع الصور...', he: 'מעלה תמונות...', en: 'Uploading images...' },
+  
+  // Form Actions
+  submit_application: { ar: 'إرسال الطلب', he: 'שלח בקשה', en: 'Submit Application' },
+  submitting: { ar: 'جاري الإرسال...', he: 'שולח...', en: 'Submitting...' },
+  
+  // Validation Messages
+  enter_vehicle_model: { ar: 'يرجى إدخال موديل المركبة', he: 'אנא הכנס דגם רכב', en: 'Please enter vehicle model' },
+  enter_license_plate_error: { ar: 'يرجى إدخال رقم اللوحة', he: 'אנא הכנס מספר לוחית', en: 'Please enter license plate' },
+  upload_at_least_one_image: { ar: 'يرجى رفع صورة واحدة على الأقل للمركبة', he: 'אנא העלה תמונה אחת לפחות של הרכב', en: 'Please upload at least one vehicle image' },
+  upload_images_only: { ar: 'يرجى رفع صور فقط', he: 'אנא העלה תמונות בלבד', en: 'Please upload images only' },
+  image_size_limit: { ar: 'حجم الصورة يجب أن يكون أقل من 5 ميجابايت', he: 'גודל התמונה חייב להיות פחות מ-5MB', en: 'Image size must be less than 5MB' },
+  
+  // Success Messages
+  images_uploaded_success: { ar: 'تم رفع {count} صورة بنجاح', he: '{count} תמונות הועלו בהצלחה', en: '{count} images uploaded successfully' },
+  application_submitted_success: { ar: 'تم إرسال طלبك بنجاح! سيتم مراجعته من قبل فريق الإدارة', he: 'הבקשה נשלחה בהצלחה! היא תיבדק על ידי צוות הניהול', en: 'Application submitted successfully! It will be reviewed by our admin team' },
+  
+  // Error Messages
+  failed_upload_images: { ar: 'فشل في رفع الصور', he: 'נכשל בהעלאת התמונות', en: 'Failed to upload images' },
+  failed_submit_application: { ar: 'فشل في إرسال الطلب', he: 'נכשל בשליחת הבקשה', en: 'Failed to submit application' },
+
+  // Vehicle Types (add Hebrew)
+  pickup: { ar: 'بيك أب', he: 'טנדר', en: 'Pickup Truck' },
+  small_truck: { ar: 'شاحنة صغيرة', he: 'משאית קטנה', en: 'Small Truck' },
+  large_truck: { ar: 'شاحنة كبيرة', he: 'משאית גדולה', en: 'Large Truck' },
+  van: { ar: 'فان', he: 'טנדר', en: 'Van' },
+  other: { ar: 'أخرى', he: 'אחר', en: 'Other' }
 };
 
 export const useTranslation = (language = 'ar') => {

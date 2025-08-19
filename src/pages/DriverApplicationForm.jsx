@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { DriverApplication, User } from '@/api/entities';
+import { useTranslation } from '@/components/utils/translations';
+
 import { UploadFile } from '@/api/integrations';
 import { 
   Camera, 
@@ -43,15 +45,15 @@ export default function DriverApplicationForm({
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef(null);
 
-const vehicleTypes = [
-  { value: 'pickup', label_ar: 'بيك أب', label_he: 'טנדר', label_en: 'Pickup Truck' },
-  { value: 'small-truck', label_ar: 'شاحنة صغيرة', label_he: 'משאית קטנה', label_en: 'Small Truck' },
-  { value: 'large-truck', label_ar: 'شاحنة كبيرة', label_he: 'משאית גדולה', label_en: 'Large Truck' },
-  { value: 'van', label_ar: 'فان', label_he: 'טנדר', label_en: 'Van' },
-  { value: 'other', label_ar: 'أخرى', label_he: 'אחר', label_en: 'Other' }
-];
+  const { t } = useTranslation(language);
 
-  const t = (ar, en) => language === 'ar' ? ar : en;
+  const vehicleTypes = [
+    { value: 'pickup', key: 'pickup' },
+    { value: 'small-truck', key: 'small_truck' },
+    { value: 'large-truck', key: 'large_truck' },
+    { value: 'van', key: 'van' },
+    { value: 'other', key: 'other' }
+  ];
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -61,14 +63,14 @@ const vehicleTypes = [
   };
 
   const validateFile = (file) => {
-    if (!file.type.startsWith('image/')) {
-      throw new Error(t('يرجى رفع صور فقط', 'Please upload images only'));
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      throw new Error(t('حجم الصورة يجب أن يكون أقل من 5 ميجابايت', 'Image size must be less than 5MB'));
-    }
-    return true;
-  };
+  if (!file.type.startsWith('image/')) {
+    throw new Error(t('upload_images_only'));
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error(t('image_size_limit'));
+  }
+  return true;
+};
 
   const handleImageUpload = async (files) => {
     setUploading(true);
@@ -98,8 +100,7 @@ const vehicleTypes = [
         vehicle_images: newImages
       }));
       
-      toast.success(t(`تم رفع ${validFiles.length} صورة بنجاح`, `${validFiles.length} images uploaded successfully`));
-    } catch (error) {
+toast.success(t('images_uploaded_success', { count: validFiles.length }));    } catch (error) {
       console.error('Upload error:', error);
       toast.error(t('فشل في رفع الصور', 'Failed to upload images'));
     } finally {
@@ -148,40 +149,41 @@ const vehicleTypes = [
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
     
-    if (!formData.vehicle_model.trim()) {
-      toast.error(t('يرجى إدخال موديل المركبة', 'Please enter vehicle model'));
-      return;
-    }
+  e.preventDefault();
+  
+  if (!formData.vehicle_model.trim()) {
+    toast.error(t('enter_vehicle_model'));
+    return;
+  }
 
-    if (!formData.license_plate.trim()) {
-      toast.error(t('يرجى إدخال رقم اللوحة', 'Please enter license plate'));
-      return;
-    }
+  if (!formData.license_plate.trim()) {
+    toast.error(t('enter_license_plate_error'));
+    return;
+  }
 
-    if (formData.vehicle_images.length === 0) {
-      toast.error(t('يرجى رفع صورة واحدة على الأقل للمركبة', 'Please upload at least one vehicle image'));
-      return;
-    }
+  if (formData.vehicle_images.length === 0) {
+    toast.error(t('upload_at_least_one_image'));
+    return;
+  }
 
-    setSubmitting(true);
-    try {
-      await DriverApplication.create({
-        ...formData,
-        application_type: 'driver_registration_with_vehicle',
-      });
+  setSubmitting(true);
+  try {
+    await DriverApplication.create({
+      ...formData,
+      application_type: 'driver_registration_with_vehicle',
+    });
 
-      toast.success(t('تم إرسال طلبك بنجاح! سيتم مراجعته من قبل فريق الإدارة', 'Application submitted successfully! It will be reviewed by our admin team'));
-      onSuccess?.();
-      onClose?.();
-    } catch (error) {
-      console.error('Error submitting application:', error);
-      toast.error(t('فشل في إرسال الطلب', 'Failed to submit application'));
-    } finally {
-      setSubmitting(false);
-    }
-  };
+    toast.success(t('application_submitted_success'));
+    onSuccess?.();
+    onClose?.();
+  } catch (error) {
+    console.error('Error submitting application:', error);
+    toast.error(t('failed_submit_application'));
+  } finally {
+    setSubmitting(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -194,11 +196,11 @@ const vehicleTypes = [
               </div>
               <div>
                 <h2 className="text-xl font-bold text-gray-900">
-                  {t('طلب انضمام كسائق', 'Driver Application')}
-                </h2>
-                <p className="text-gray-600 text-sm">
-                  {t('املأ البيانات وارفع صور المركبة', 'Fill in the details and upload vehicle images')}
-                </p>
+  {t('driver_application')}
+</h2>
+<p className="text-gray-600 text-sm">
+  {t('fill_details_upload')}
+</p>
               </div>
             </div>
             <Button variant="ghost" onClick={onClose} className="p-2">
@@ -212,44 +214,45 @@ const vehicleTypes = [
             {/* Vehicle Information */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <Truck className="w-5 h-5 mr-2" />
-                {t('معلومات المركبة', 'Vehicle Information')}
-              </h3>
+  <Truck className="w-5 h-5 mr-2" />
+  {t('vehicle_information')}
+</h3>
+
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('نوع المركبة', 'Vehicle Type')}
-                  </label>
-                  <select
-                    value={formData.vehicle_type}
-                    onChange={(e) => handleInputChange('vehicle_type', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                  >
-                    {vehicleTypes.map(type => (
-                      <option key={type.value} value={type.value}>
-                        {type[`label_${language}`]}
-                      </option>
-                    ))}
-                  </select>
+  {t('vehicle_type')}
+</label>
+<select
+  value={formData.vehicle_type}
+  onChange={(e) => handleInputChange('vehicle_type', e.target.value)}
+  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+>
+  {vehicleTypes.map(type => (
+    <option key={type.value} value={type.value}>
+      {t(type.key)}
+    </option>
+  ))}
+</select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('موديل المركبة', 'Vehicle Model')}
-                  </label>
-                  <Input
-                    required
-                    value={formData.vehicle_model}
-                    onChange={(e) => handleInputChange('vehicle_model', e.target.value)}
-                    placeholder={t('مثال: فورد ترانزيت 2020', 'e.g., Ford Transit 2020')}
-                  />
+  {t('vehicle_model')}
+</label>
+<Input
+  required
+  value={formData.vehicle_model}
+  onChange={(e) => handleInputChange('vehicle_model', e.target.value)}
+  placeholder={t('vehicle_model_example')}
+/>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('سنة الصنع', 'Manufacturing Year')}
-                  </label>
+  {t('manufacturing_year')}
+</label>
                   <Input
                     type="number"
                     min="2000"
@@ -262,52 +265,52 @@ const vehicleTypes = [
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('رقم اللوحة', 'License Plate')} *
-                  </label>
-                  <Input
-                    required
-                    value={formData.license_plate}
-                    onChange={(e) => handleInputChange('license_plate', e.target.value)}
-                    placeholder={t('أدخل رقم اللوحة', 'Enter license plate')}
-                  />
+  {t('license_plate')} *
+</label>
+<Input
+  required
+  value={formData.license_plate}
+  onChange={(e) => handleInputChange('license_plate', e.target.value)}
+  placeholder={t('enter_license_plate')}
+/>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('وصف المركبة', 'Vehicle Description')}
-                </label>
-                <textarea
-                  value={formData.vehicle_description}
-                  onChange={(e) => handleInputChange('vehicle_description', e.target.value)}
-                  placeholder={t('وصف إضافي للمركبة: أبعاد المركبة...اضافات مثل عربة, كرفان', 'Additional vehicle description: Vehicle dimensions...extras such as a caravan, van')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                  rows={3}
-                />
+               <label className="block text-sm font-medium text-gray-700 mb-1">
+  {t('vehicle_description')}
+</label>
+<textarea
+  value={formData.vehicle_description}
+  onChange={(e) => handleInputChange('vehicle_description', e.target.value)}
+  placeholder={t('vehicle_description_placeholder')}
+  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+  rows={3}
+/>
               </div>
             </div>
 
             {/* Driver Experience */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <UserIcon className="w-5 h-5 mr-2" />
-                {t('الخبرة في القيادة', 'Driving Experience')}
-              </h3>
+             <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+  <UserIcon className="w-5 h-5 mr-2" />
+  {t('driving_experience')}
+</h3>
+</div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {t('سنوات الخبرة', 'Years of Experience')}
-                  </label>
-                  <Input
-                    type="number"
-                    min="0"
-                    max="50"
-                    value={formData.experience_years}
-                    onChange={(e) => handleInputChange('experience_years', e.target.value)}
-                    placeholder={t('عدد سنوات الخبرة', 'Number of years')}
-                  />
-                </div>
+  {t('years_of_experience')}
+</label>
+<Input
+  type="number"
+  min="0"
+  max="50"
+  value={formData.experience_years}
+  onChange={(e) => handleInputChange('experience_years', e.target.value)}
+  placeholder={t('number_of_years')}
+/>
 
                 <div className="space-y-2">
                   <label className="flex items-center">
@@ -317,7 +320,7 @@ const vehicleTypes = [
                       onChange={(e) => handleInputChange('has_license', e.target.checked)}
                       className="mr-2 rtl:ml-2 rtl:mr-0"
                     />
-                    <span className="text-sm">{t('لدي رخصة قيادة سارية', 'I have a valid driving license')}</span>
+<span className="text-sm">{t('valid_license')}</span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -326,36 +329,36 @@ const vehicleTypes = [
                       onChange={(e) => handleInputChange('has_insurance', e.target.checked)}
                       className="mr-2 rtl:ml-2 rtl:mr-0"
                     />
-                    <span className="text-sm">{t('المركبة مؤمنة', 'Vehicle is insured')}</span>
+<span className="text-sm">{t('vehicle_insured')}</span>
                   </label>
                 </div>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('ملاحظات إضافية', 'Additional Notes')}
-                </label>
-                <textarea
-                  value={formData.additional_notes}
-                  onChange={(e) => handleInputChange('additional_notes', e.target.value)}
-                  placeholder={t('أي معلومات إضافية تود مشاركتها...', 'Any additional information you want to share...')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
-                  rows={3}
-                />
+  {t('additional_notes')}
+</label>
+<textarea
+  value={formData.additional_notes}
+  onChange={(e) => handleInputChange('additional_notes', e.target.value)}
+  placeholder={t('additional_info_share')}
+  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+  rows={3}
+/>
               </div>
             </div>
 
             {/* Vehicle Images */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                <ImageIcon className="w-5 h-5 mr-2" />
-                {t('صور المركبة', 'Vehicle Images')} *
-                {formData.vehicle_images.length > 0 && (
-                  <Badge className="ml-2 bg-green-100 text-green-800">
-                    {formData.vehicle_images.length}
-                  </Badge>
-                )}
-              </h3>
+  <ImageIcon className="w-5 h-5 mr-2" />
+  {t('vehicle_images_required')}
+  {formData.vehicle_images.length > 0 && (
+    <Badge className="ml-2 bg-green-100 text-green-800">
+      {formData.vehicle_images.length}
+    </Badge>
+  )}
+</h3>
 
               {/* Image Gallery */}
               {formData.vehicle_images.length > 0 ? (
@@ -406,20 +409,20 @@ const vehicleTypes = [
                 {uploading ? (
                   <div className="flex flex-col items-center">
                     <Loader2 className="w-8 h-8 animate-spin text-red-500 mb-2" />
-                    <p className="text-sm text-gray-600">{t('جاري رفع الصور...', 'Uploading images...')}</p>
+<p className="text-sm text-gray-600">{t('uploading_images')}</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center">
                     <Upload className="w-12 h-12 text-gray-400 mb-4" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      {t('ارفع صور المركبة', 'Upload Vehicle Images')}
-                    </h3>
+  {t('upload_vehicle_images')}
+</h3>
                     <p className="text-sm text-gray-600 mb-2">
-                      {t('اسحب الصور هنا أو انقر للاختيار', 'Drag images here or click to select')}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {t('الحد الأقصى 5 ميجابايت لكل صورة', 'Maximum 5MB per image')}
-                    </p>
+  {t('drag_images_or_click')}
+</p>
+<p className="text-xs text-gray-500">
+  {t('max_size_per_image')}
+</p>
                   </div>
                 )}
               </div>
@@ -433,7 +436,7 @@ const vehicleTypes = [
                   className="flex-1"
                 >
                   <Camera className="w-4 h-4 mr-2" />
-                  {t('إضافة صور', 'Add Images')}
+                   {t('add_images')}
                 </Button>
                 
                 {formData.vehicle_images.length > 0 && (
@@ -452,32 +455,33 @@ const vehicleTypes = [
             {/* Submit Buttons */}
             <div className="flex gap-4 pt-6 border-t">
               <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
-                disabled={submitting}
-              >
-                <X className="w-4 h-4 mr-2" />
-                {t('إلغاء', 'Cancel')}
-              </Button>
+  type="button"
+  variant="outline"
+  onClick={onClose}
+  className="flex-1"
+  disabled={submitting}
+>
+  <X className="w-4 h-4 mr-2" />
+  {t('cancel')}
+</Button>
+
               <Button
-                type="submit"
-                disabled={submitting || uploading || formData.vehicle_images.length === 0}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-              >
-                {submitting ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                    {t('جاري الإرسال...', 'Submitting...')}
-                  </>
-                ) : (
-                  <>
-                    <FileText className="w-4 h-4 mr-2" />
-                    {t('إرسال الطلب', 'Submit Application')}
-                  </>
-                )}
-              </Button>
+  type="submit"
+  disabled={submitting || uploading || formData.vehicle_images.length === 0}
+  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+>
+  {submitting ? (
+    <>
+      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+      {t('submitting')}
+    </>
+  ) : (
+    <>
+      <FileText className="w-4 h-4 mr-2" />
+      {t('submit_application')}
+    </>
+  )}
+</Button>
             </div>
           </form>
         </CardContent>
