@@ -265,27 +265,20 @@ export default function VehicleManager({ vehicles, language, onVehicleUpdate }) 
   }, [vehicle]);
 
   const handleInputChange = (field, value) => {
-    if (field === 'price_per_hour') {
-      if (value === '' || isNaN(parseFloat(value))) {
-        value = 0;
-      } else {
-        value = parseFloat(value);
-      }
+  if (field === 'price_per_hour') {
+    if (value === '' || isNaN(parseFloat(value))) {
+      value = 0;
+    } else {
+      value = parseFloat(value);
     }
-    
-    setFormData(prev => {
-      const newData = {
-        ...prev,
-        [field]: value
-      };
-      
-      // IMPORTANT: Call onSave immediately to sync with parent
-      // This ensures parent state is always in sync
-      onSave(newData);
-      
-      return newData;
-    });
-  };
+  }
+  
+  setFormData(prev => ({
+    ...prev,
+    [field]: value
+  }));
+  // ❌ REMOVE THIS LINE: onSave(newData);
+};
 
     const handleFeatureChange = (lang, value) => {
       const features = value.split(',').map(f => f.trim()).filter(f => f);
@@ -710,27 +703,24 @@ const handleMultipleImageUpload = async (files) => {
       </div>
 
       {/* Add New Vehicle Form */}
-      {showAddForm && (
-        <div className="card-premium">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">{t.addNewVehicle}</h3>
-          </div>
-          <VehicleForm 
-  vehicle={newVehicle}
-  isNew={true} 
-  t={t}
-  onSave={(formData) => {
-    console.log('Form data updated:', formData);
-    setNewVehicle(formData); // This will update the parent state immediately
-  }}
-  onCancel={() => setShowAddForm(false)}
-  loading={loading}
-  language={language}
-  isRTL={isRTL}
-  showToast={showToast}
-/>
-        </div>
-      )}
+     {showAddForm && (
+  <div className="card-premium">
+    <div className="p-6 border-b border-gray-200">
+      <h3 className="text-lg font-semibold text-gray-900">{t.addNewVehicle}</h3>
+    </div>
+    <VehicleForm 
+      vehicle={newVehicle}
+      isNew={true} 
+      t={t}
+      onSave={handleAddVehicle} // ✅ This is correct
+      onCancel={() => setShowAddForm(false)}
+      loading={loading}
+      language={language}
+      isRTL={isRTL}
+      showToast={showToast}
+    />
+  </div>
+)}
 
       {/* Vehicles List */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -776,19 +766,19 @@ const handleMultipleImageUpload = async (files) => {
               </div>
 
               {/* Edit Form or Vehicle Info */}
-              {editingVehicle === vehicle.id ? (
-                <VehicleForm 
-  vehicle={vehicle}
-  isNew={false} 
-  t={t}
-  onSave={(formData) => handleUpdateVehicle(vehicle.id, formData)}
-  onCancel={() => setEditingVehicle(null)}
-  loading={loading}
-  language={language}
-  isRTL={isRTL}
-  showToast={showToast}
-/>
-              ) : (
+             {editingVehicle === vehicle.id ? (
+  <VehicleForm 
+    vehicle={vehicle}
+    isNew={false} 
+    t={t}
+    onSave={(formData) => handleUpdateVehicle(vehicle.id, formData)} // ✅ Keep this
+    onCancel={() => setEditingVehicle(null)}
+    loading={loading}
+    language={language}
+    isRTL={isRTL}
+    showToast={showToast}
+  />
+) : (
                 <div>
                   {/* Vehicle Details */}
                   <div className="grid grid-cols-2 gap-4 text-sm mb-6">
