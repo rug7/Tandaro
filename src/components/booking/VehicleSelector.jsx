@@ -130,7 +130,7 @@ const VehicleSelector = ({
   language = 'ar', 
   onVehicleSelect, 
   selectedVehicle,
-  onPrevious, // Add these props
+  onBack, // Add these props
   onNext
 }) => {
     const [vehicles, setVehicles] = useState([]);
@@ -296,7 +296,7 @@ const VehicleSelector = ({
         {/* Navigation Buttons */}
         <div className="flex justify-between mt-8">
   <Button
-    onClick={onPrevious}
+    onClick={onBack}
     variant="outline"
     className="flex items-center gap-2 rounded-xl"
   >
