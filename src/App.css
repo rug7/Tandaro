@@ -285,4 +285,80 @@ html {
   .bg-gray-500 {
     background-color: #6B7280 !important;
   }
-  
+  /* Add this to your App.css or global styles */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Add animation keyframes for the gallery */
+@keyframes logo-breathe-modern {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg);
+    opacity: 0.08;
+  }
+  50% { 
+    transform: scale(1.05) rotate(1deg);
+    opacity: 0.12;
+  }
+}
+
+@keyframes modern-float {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg);
+    opacity: 0.12;
+  }
+  50% { 
+    transform: translateY(-10px) rotate(5deg);
+    opacity: 0.08;
+  }
+}
+
+@keyframes particle-modern {
+  0%, 100% { 
+    transform: translateY(0px) scale(1);
+    opacity: 0.3;
+  }
+  50% { 
+    transform: translateY(-20px) scale(1.1);
+    opacity: 0.1;
+  }
+}
+
+.animate-logo-breathe-modern {
+  animation: logo-breathe-modern 20s ease-in-out infinite;
+}
+
+.animate-modern-float {
+  animation: modern-float 15s ease-in-out infinite;
+}
+
+.animate-particle-modern {
+  animation: particle-modern 10s linear infinite;
+}
+/* Add to your App.css or global styles */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

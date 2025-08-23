@@ -5,6 +5,9 @@ import { User } from "@/api/entities";
 import { useToast } from "@/components/ui/use-toast";
 import AuthModal from '@/components/auth/AuthModal';
 import { Toaster } from "@/components/ui/toaster";
+import WhatsAppButton from '@/components/WhatsAppButton';
+import Gallery from '@/components/Gallery';
+import FeedbackReport from '@/components/FeedbackReport';
 
 import { useTranslation, getDirection } from "@/components/utils/translations";
 import { 
@@ -596,35 +599,50 @@ export default function Layout({ children, currentPageName }) {
           ))}
         </div>
         
-        {/* Simple, Clean CTA - Unchanged */}
-        <div className="space-y-6">
-          <Button 
-            onClick={handleLogin} 
-            size="lg" 
-            className="bg-red-500 hover:bg-red-600 text-white px-12 py-4 text-xl font-semibold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
-          >
-            <LogIn className="w-6 h-6 mr-3 rtl:ml-3 rtl:mr-0" />
-            {language === 'ar' ? 'ابدأ الآن' : language === 'he' ? 'התחל עכשיו' : 'Get Started'}
-          </Button>
-          
-          <div className="bg-white/50 backdrop-blur-md rounded-xl px-6 py-3 inline-block shadow-md border border-white/50">
-            <div className="text-slate-600 flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span>
-                {language === 'ar' ? 'للمساعدة واتساب: 0539364800' : 
-                 language === 'he' ? 'לעזרה בוואטסאפ: 0539364800' : 
-                 'Help via WhatsApp: 0539364800'}
-              </span>
+        {/* Updated CTA Section with WhatsApp Button */}
+          <div className="space-y-6 mb-16">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <Button 
+                onClick={handleLogin} 
+                size="lg" 
+                className="bg-red-500 hover:bg-red-600 text-white px-12 py-4 text-xl font-semibold rounded-2xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+              >
+                <LogIn className="w-6 h-6 mr-3 rtl:ml-3 rtl:mr-0" />
+                {language === 'ar' ? 'ابدأ الآن' : language === 'he' ? 'התחל עכשיו' : 'Get Started'}
+              </Button>
+              
+              {/* WhatsApp Button */}
+              <WhatsAppButton language={language} phoneNumber="972539364800" />
             </div>
+            
+            <div className="bg-white/50 backdrop-blur-md rounded-xl px-6 py-3 inline-block shadow-md border border-white/50">
+              <div className="text-slate-600 flex items-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                <span>
+                  {language === 'ar' ? 'للمساعدة واتساب: 0539364800' : 
+                   language === 'he' ? 'לעזרה בוואטסאפ: 0539364800' : 
+                   'Help via WhatsApp: 0539364800'}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Gallery Section - NEW */}
+          <div className="mb-16">
+            <Gallery language={language} isAdmin={false} />
+          </div>
+
+          {/* Feedback/Report Section - NEW */}
+          <div className="mb-16">
+            <FeedbackReport language={language} user={user} />
           </div>
         </div>
       </div>
+      
+      <div className="relative z-10">
+        <FeedbackSection language={language} />
+      </div>
     </div>
-    
-    <div className="relative z-10">
-      <FeedbackSection language={language} />
-    </div>
-  </div>
 ) : (
         /* Main Content for Authenticated Users */
         <main className="flex-1 min-h-screen">

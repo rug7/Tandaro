@@ -1,5 +1,7 @@
 import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "./firebase.js";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "./firebase.js";
 
 // Firestore entity functions
 export const Vehicle = {
@@ -469,6 +471,189 @@ export const DriverApplication = {
       return true;
     } catch (error) {
       console.error("Delete driver application error:", error);
+      throw error;
+    }
+  }
+};
+
+export const GalleryImage = {
+  list: async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "gallery_images"));
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        .filter(img => img.is_active !== false)
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    } catch (error) {
+      console.error("List gallery images error:", error);
+      throw error;
+    }
+  },
+
+  create: async (data) => {
+    try {
+      const imageData = {
+        ...data,
+        is_active: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      const docRef = await addDoc(collection(db, "gallery_images"), imageData);
+      return { id: docRef.id, ...imageData };
+    } catch (error) {
+      console.error("Create gallery image error:", error);
+      throw error;
+    }
+  },
+
+  delete: async (id) => {
+    try {
+      const imageRef = doc(db, "gallery_images", id);
+      await updateDoc(imageRef, {
+        is_active: false,
+        deleted_at: new Date().toISOString()
+      });
+      return true;
+    } catch (error) {
+      console.error("Delete gallery image error:", error);
+      throw error;
+    }
+  },
+
+  uploadImage: async (file) => {
+    try {
+      const filename = `gallery/${Date.now()}_${file.name}`;
+      const storageRef = ref(storage, filename);
+      
+      const snapshot = await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(snapshot.ref);
+      
+      return downloadURL;
+    } catch (error) {
+      console.error("Upload image error:", error);
+      throw error;
+    }
+  }
+};
+
+export const Feedback = {
+  list: async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "feedback"));
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    } catch (error) {
+      console.error("List feedback error:", error);
+      throw error;
+    }
+  },
+
+  create: async (data) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("currentUser"));
+      const feedbackData = {
+        ...data,
+        user_id: user?.id || null,
+        user_name: user?.full_name || data.name || 'Anonymous',
+        user_email: user?.email || data.email || null,
+        user_phone: user?.phone || null,
+        created_at: new Date().toISOString(),
+        is_read: false
+      };
+      
+      const docRef = await addDoc(collection(db, "feedback"), feedbackData);
+      return { id: docRef.id, ...feedbackData };
+    } catch (error) {
+      console.error("Create feedback error:", error);
+      throw error;
+    }
+  },
+
+  markAsRead: async (id) => {
+    try {
+      const feedbackRef = doc(db, "feedback", id);
+      await updateDoc(feedbackRef, {
+        is_read: true,
+        read_at: new Date().toISOString()
+      });
+      return true;
+    } catch (error) {
+      console.error("Mark feedback as read error:", error);
+      throw error;
+    }
+  }
+};
+
+export const Report = {
+  list: async () => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "reports"));
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    } catch (error) {
+      console.error("List reports error:", error);
+      throw error;
+    }
+  },
+
+  create: async (data) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("currentUser"));
+      const reportData = {
+        ...data,
+        user_id: user?.id || null,
+        user_name: user?.full_name || 'Anonymous',
+        user_email: user?.email || null,
+        user_phone: user?.phone || null,
+        status: 'open',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      const docRef = await addDoc(collection(db, "reports"), reportData);
+      return { id: docRef.id, ...reportData };
+    } catch (error) {
+      console.error("Create report error:", error);
+      throw error;
+    }
+  },
+
+  update: async (id, data) => {
+    try {
+      const reportRef = doc(db, "reports", id);
+      const updateData = {
+        ...data,
+        updated_at: new Date().toISOString()
+      };
+
+      if (data.status === 'resolved') {
+        updateData.resolved_at = new Date().toISOString();
+      }
+
+      await updateDoc(reportRef, updateData);
+      return true;
+    } catch (error) {
+      console.error("Update report error:", error);
+      throw error;
+    }
+  },
+
+  filter: async (filters) => {
+    try {
+      const querySnapshot = await getDocs(collection(db, "reports"));
+      let reports = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      
+      if (filters.status) {
+        reports = reports.filter(report => report.status === filters.status);
+      }
+      
+      if (filters.user_id) {
+        reports = reports.filter(report => report.user_id === filters.user_id);
+      }
+      
+      return reports.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    } catch (error) {
+      console.error('Error filtering reports:', error);
       throw error;
     }
   }
