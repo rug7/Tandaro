@@ -157,10 +157,12 @@ toast.success(t('images_uploaded_success', { count: validFiles.length }));    } 
     return;
   }
 
-  if (!formData.license_plate.trim()) {
-    toast.error(t('enter_license_plate_error'));
-    return;
-  }
+ if (!formData.license_plate.trim() || formData.license_plate.length < 7) {
+  toast.error(language === 'ar' ? 'رقم اللوحة يجب أن يكون 7-8 أرقام' : 
+             language === 'he' ? 'מספר לוח חייב להיות 7-8 ספרות' : 
+             'License plate must be 7-8 digits');
+  return;
+}
 
   if (formData.vehicle_images.length === 0) {
     toast.error(t('upload_at_least_one_image'));
@@ -270,8 +272,16 @@ toast.success(t('images_uploaded_success', { count: validFiles.length }));    } 
 <Input
   required
   value={formData.license_plate}
-  onChange={(e) => handleInputChange('license_plate', e.target.value)}
-  placeholder={t('enter_license_plate')}
+  onChange={(e) => {
+    const value = e.target.value.replace(/[^0-9]/g, ''); // Only numbers
+    if (value.length <= 8) { // Max 8 digits
+      handleInputChange('license_plate', value);
+    }
+  }}
+  placeholder="1234567"
+  minLength="7"
+  maxLength="8"
+  pattern="[0-9]{7,8}"
 />
                 </div>
               </div>

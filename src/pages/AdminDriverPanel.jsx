@@ -249,23 +249,27 @@ export default function AdminDriverPanel() {
   };
 
   // New functions for driver application management
-  const handleAcceptApplication = async (application) => {
-    try {
-      // 1. Update user's role to 'driver'
-      await User.update(application.user_id, { role: 'driver' });
+const handleAcceptApplication = async (application) => {
+  try {
+    // Use the new method that creates vehicle AND updates user role
+    await DriverApplication.acceptApplicationAndCreateVehicle(
+      application.id, 
+      'Application approved by admin'
+    );
 
-      // 2. Update the application status to 'approved'
-      await DriverApplication.update(application.id, { status: 'approved' });
+    toast.success(
+      language === 'ar' ? 'تم قبول الطلب وإنشاء المركبة بنجاح' :
+      language === 'he' ? 'הבקשה אושרה והרכב נוצר בהצלחה' :
+      'Application approved and vehicle created successfully'
+    );
 
-      toast.success(t('driver_accepted_success'));
-
-      // 3. Refresh data to update lists (drivers and pending applications)
-      loadData();
-    } catch (error) {
-      console.error('Error accepting driver application:', error);
-      toast.error(t('error_accepting_driver'));
-    }
-  };
+    // Refresh data
+    loadData();
+  } catch (error) {
+    console.error('Error accepting driver application:', error);
+    toast.error('Error accepting application');
+  }
+};
 
   const handleRejectApplication = async (application) => {
     try {

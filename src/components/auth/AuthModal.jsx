@@ -31,6 +31,8 @@ export default function AuthModal({ isOpen, onClose, language = 'ar' }) {
       switchToSignup: 'ليس لديك حساب؟ إنشاء حساب',
       switchToLogin: 'لديك حساب؟ تسجيل الدخول',
       phoneRequired: 'رقم الهاتف مطلوب',
+          phoneInvalid: 'رقم الهاتف يجب أن يبدأ بـ 05 ويكون 10 أرقام', // ADD THIS
+
       nameRequired: 'الاسم الكامل مطلوب',
       userNotFound: 'المستخدم غير موجود. يرجى إنشاء حساب جديد.',
       userExists: 'يوجد مستخدم بهذا الرقم مسبقاً.',
@@ -54,6 +56,8 @@ export default function AuthModal({ isOpen, onClose, language = 'ar' }) {
       switchToSignup: 'אין לך חשבון? הרשמה',
       switchToLogin: 'יש לך חשבון? התחברות',
       phoneRequired: 'מספר טלפון נדרש',
+          phoneInvalid: 'מספר הטלפון חייב להתחיל ב-05 ולהיות 10 ספרות', // ADD THIS
+
       nameRequired: 'שם מלא נדרש',
       userNotFound: 'משתמש לא נמצא. אנא צור חשבון חדש.',
       userExists: 'משתמש עם מספר זה כבר קיים.',
@@ -77,6 +81,8 @@ export default function AuthModal({ isOpen, onClose, language = 'ar' }) {
       switchToSignup: 'Don\'t have an account? Sign up',
       switchToLogin: 'Have an account? Login',
       phoneRequired: 'Phone number is required',
+          phoneInvalid: 'Phone number must start with 05 and be 10 digits', // ADD THIS
+
       nameRequired: 'Full name is required',
       userNotFound: 'User not found. Please create a new account.',
       userExists: 'User with this phone number already exists.',
@@ -93,13 +99,27 @@ export default function AuthModal({ isOpen, onClose, language = 'ar' }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!phone.trim() || phone.length < 10) {
-      toast({
-        title: t.phoneRequired,
-        variant: "destructive",
-      });
-      return;
-    }
+    // Phone validation
+let cleanPhone = phone.replace(/[^0-9]/g, ''); // Remove non-digits
+
+// Handle Israeli format
+if (cleanPhone.startsWith('972')) {
+  cleanPhone = cleanPhone.substring(3); // Remove country code
+}
+if (cleanPhone.startsWith('0')) {
+  cleanPhone = cleanPhone.substring(1); // Remove leading 0
+}
+
+// Validate format: must be 9 digits starting with 5
+if (cleanPhone.length !== 9 || !cleanPhone.startsWith('5')) {
+  toast({
+    title: t.phoneInvalid,
+    variant: "destructive",
+  });
+  return;
+}
+
+const finalPhone = `+972${cleanPhone}`;
 
     if (!isLogin && !name.trim()) {
       toast({
@@ -113,7 +133,7 @@ export default function AuthModal({ isOpen, onClose, language = 'ar' }) {
     
     try {
       const snapshot = await getDocs(collection(db, "users"));
-      const existing = snapshot.docs.find(doc => doc.data().phone === phone.trim());
+const existing = snapshot.docs.find(doc => doc.data().phone === finalPhone);
 
       if (isLogin) {
         if (existing) {
@@ -142,7 +162,7 @@ export default function AuthModal({ isOpen, onClose, language = 'ar' }) {
         } else {
           const docRef = await addDoc(collection(db, "users"), {
             full_name: name.trim(),
-            phone: phone.trim(),
+phone: finalPhone,
             created_at: new Date().toISOString(),
             is_admin: false
           });
@@ -150,7 +170,7 @@ export default function AuthModal({ isOpen, onClose, language = 'ar' }) {
           const user = {
             id: docRef.id,
             full_name: name.trim(),
-            phone: phone.trim(),
+phone: finalPhone,
             created_at: new Date().toISOString(),
             is_admin: false
           };

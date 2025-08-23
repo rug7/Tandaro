@@ -1,7 +1,8 @@
-import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { db } from "./firebase.js";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "./firebase.js";
+import { collection, getDocs, addDoc, doc, updateDoc, deleteDoc, getDoc } from "firebase/firestore";
+
 
 // Firestore entity functions
 export const Vehicle = {
@@ -432,6 +433,93 @@ export const DriverApplication = {
       throw error;
     }
   },
+
+  acceptApplicationAndCreateVehicle: async (applicationId, adminNotes = '') => {
+  try {
+    // Get the application data first
+    const applicationRef = doc(db, "driver_applications", applicationId);
+const applicationDoc = await getDoc(applicationRef);
+    
+    if (!applicationDoc.exists()) {
+      throw new Error('Application not found');
+    }
+    
+    const applicationData = applicationDoc.data();
+    
+    // Create vehicle from application data
+    const vehicleData = {
+      // Names - you might want to make these more descriptive
+      name_ar: `${applicationData.vehicle_model} - ${applicationData.user_name}`,
+      name_he: `${applicationData.vehicle_model} - ${applicationData.user_name}`,
+      name_en: `${applicationData.vehicle_model} - ${applicationData.user_name}`,
+      
+      // Vehicle details from application
+      type: applicationData.vehicle_type,
+      license_plate: applicationData.license_plate,
+      
+      // Capacity - you might want to set defaults based on vehicle type
+      capacity_ar: getCapacityByType(applicationData.vehicle_type, 'ar'),
+      capacity_he: getCapacityByType(applicationData.vehicle_type, 'he'),
+      capacity_en: getCapacityByType(applicationData.vehicle_type, 'en'),
+      
+      // Default pricing - you can adjust this
+      price_per_hour: getDefaultPriceByType(applicationData.vehicle_type),
+      currency: 'شيكل',
+      
+      // Vehicle images from application
+      images: applicationData.vehicle_images || [],
+      
+      // Driver information
+      driver_id: applicationData.user_id,
+      driver_name: applicationData.user_name,
+      driver_phone: applicationData.user_phone,
+      
+      // Default features based on vehicle type
+      features_ar: getFeaturesByType(applicationData.vehicle_type, 'ar'),
+      features_he: getFeaturesByType(applicationData.vehicle_type, 'he'),
+      features_en: getFeaturesByType(applicationData.vehicle_type, 'en'),
+      
+      // Status
+      available: true,
+      source: 'driver_application',
+      application_id: applicationId,
+      
+      // Timestamps
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    // Create the vehicle
+    const vehicleDocRef = await addDoc(collection(db, "vehicles"), vehicleData);
+    const createdVehicle = { id: vehicleDocRef.id, ...vehicleData };
+    
+    // Update the application status to approved
+    await updateDoc(applicationRef, {
+      status: 'approved',
+      approved_at: new Date().toISOString(),
+      admin_notes: adminNotes,
+      created_vehicle_id: vehicleDocRef.id,
+      updated_at: new Date().toISOString()
+    });
+    
+    // Update user role to driver
+    const userRef = doc(db, "users", applicationData.user_id);
+    await updateDoc(userRef, {
+      role: 'driver',
+      vehicle_id: vehicleDocRef.id,
+      updated_at: new Date().toISOString()
+    });
+    
+    return {
+      application: { id: applicationId, ...applicationData, status: 'approved' },
+      vehicle: createdVehicle
+    };
+    
+  } catch (error) {
+    console.error("Error accepting application and creating vehicle:", error);
+    throw error;
+  }
+},
   
   filter: async (filters) => {
     try {
@@ -657,4 +745,75 @@ export const Report = {
       throw error;
     }
   }
+};
+
+const getCapacityByType = (vehicleType, language) => {
+  const capacities = {
+    'pickup': {
+      ar: 'حمولة صغيرة - متوسطة',
+      he: 'מטען קטן-בינוני',
+      en: 'Small-Medium Load'
+    },
+    'small-truck': {
+      ar: 'حمولة متوسطة',
+      he: 'מטען בינוני',
+      en: 'Medium Load'
+    },
+    'large-truck': {
+      ar: 'حمولة كبيرة',
+      he: 'מטען גדול',
+      en: 'Large Load'
+    },
+    'van': {
+      ar: 'حمولة خفيفة',
+      he: 'מטען קל',
+      en: 'Light Load'
+    },
+    'other': {
+      ar: 'حسب النوع',
+      he: 'לפי סוג',
+      en: 'By Type'
+    }
+  };
+  
+  return capacities[vehicleType]?.[language] || capacities['pickup'][language];
+};
+
+const getDefaultPriceByType = (vehicleType) => {
+  const prices = {
+    'pickup': 80,
+    'small-truck': 100,
+    'large-truck': 150,
+    'van': 70,
+    'other': 80
+  };
+  
+  return prices[vehicleType] || 80;
+};
+
+const getFeaturesByType = (vehicleType, language) => {
+  const features = {
+    'pickup': {
+      ar: ['مكيف', 'صندوق مفتوح', 'مناسب للأثاث'],
+      he: ['מזגן', 'ארגז פתוח', 'מתאים לרהיטים'],
+      en: ['Air Conditioned', 'Open Bed', 'Furniture Suitable']
+    },
+    'small-truck': {
+      ar: ['صندوق مغلق', 'مناسب للبضائع', 'حماية من المطر'],
+      he: ['ארגז סגור', 'מתאים לסחורות', 'הגנה מגשם'],
+      en: ['Closed Box', 'Goods Suitable', 'Weather Protection']
+    },
+    'large-truck': {
+      ar: ['حمولة ثقيلة', 'صندوق كبير', 'للنقل التجاري'],
+      he: ['מטען כבד', 'ארגז גדול', 'להובלה מסחרית'],
+      en: ['Heavy Load', 'Large Box', 'Commercial Transport']
+    },
+    'van': {
+      ar: ['مناسب للطرود', 'توصيل سريع', 'مكيف'],
+      he: ['מתאים לחבילות', 'משלוח מהיר', 'מזגן'],
+      en: ['Package Suitable', 'Fast Delivery', 'Air Conditioned']
+    }
+  };
+  
+  return features[vehicleType]?.[language] || features['pickup'][language];
 };
