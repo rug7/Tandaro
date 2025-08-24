@@ -5,6 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTranslation } from "@/components/utils/translations";
+import { Reservation } from "@/api/entities";
+
 import { 
   Search, 
   Filter, 
@@ -190,6 +192,23 @@ export default function ReservationsTable({
       direction: prev.key === key && prev.direction === 'asc' ? 'desc' : 'asc'
     }));
   };
+
+const handleDelete = async (reservationId) => {
+  if (confirm(getTranslation(language, 'هل أنت متأكد من حذف هذا الحجز؟', 'האם אתה בטוח שברצונך למחוק הזמנה זו?', 'Are you sure you want to delete this reservation?'))) {
+    try {
+      await Reservation.delete(reservationId);
+      // Refresh the data after deletion
+      if (onReservationUpdate) {
+        onReservationUpdate(); // Call without parameters to just reload
+      }
+    } catch (error) {
+      console.error('Error deleting reservation:', error);
+      alert(getTranslation(language, 'خطأ في حذف الحجز', 'שגיאה במחיקת ההזמנה', 'Error deleting reservation'));
+    }
+  }
+};
+
+
 
   const getSortIcon = (columnKey) => {
     if (sortConfig.key !== columnKey) return <ArrowUpDown className="w-4 h-4" />;
@@ -537,6 +556,18 @@ export default function ReservationsTable({
                   <p className="text-sm text-gray-700">{reservation.notes}</p>
                 </div>
               )}
+              {/* Action Buttons */}
+<div className="mt-3 flex gap-2">
+  <Button
+    size="sm"
+    variant="destructive"
+    className="flex-1"
+    onClick={() => handleDelete(reservation.id)}
+  >
+    {getTranslation(language, 'حذف', 'מחק', 'Delete')}
+  </Button>
+
+</div>
             </div>
           )}
         </CardContent>
@@ -903,6 +934,9 @@ export default function ReservationsTable({
                         {getTranslation(language, 'الحالة', 'סטטוס', 'Status')} {getSortIcon('status')}
                       </Button>
                     </th>
+                    <th className="px-4 py-3 text-left rtl:text-right font-semibold">
+  {getTranslation(language, 'الإجراءات', 'פעולות', 'Actions')}
+</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1062,6 +1096,19 @@ export default function ReservationsTable({
                             )}
                           </div>
                         </td>
+                        {/* Actions */}
+<td className="px-4 py-3">
+  <div className="flex gap-2">
+    <Button
+      size="sm"
+      variant="destructive"
+      onClick={() => handleDelete(reservation.id)}
+    >
+      {getTranslation(language, 'حذف', 'מחק', 'Delete')}
+    </Button>
+    
+  </div>
+</td>
                       </tr>
                     );
                   })}

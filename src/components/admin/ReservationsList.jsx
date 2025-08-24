@@ -54,6 +54,8 @@ export default function ReservationsList({
   const [editingFinancials, setEditingFinancials] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [showSignaturePad, setShowSignaturePad] = useState(null);
+  const [editingFull, setEditingFull] = useState(null);
+  const [editedData, setEditedData] = useState({});
   
 
   const serviceTypes = {
@@ -162,6 +164,87 @@ export default function ReservationsList({
       console.error('Error updating notes:', error);
     }
   };
+  const deleteReservation = async (reservationId) => {
+  if (confirm(language === 'ar' ? 'هل أنت متأكد من حذف هذا الحجز؟' : 'Are you sure you want to delete this reservation?')) {
+    try {
+      await Reservation.delete(reservationId);
+      onReservationUpdate();
+    } catch (error) {
+      console.error('Error deleting reservation:', error);
+    }
+  }
+};
+const updateReservationFull = async (reservationId) => {
+  try {
+    // Get the current reservation
+    const reservation = reservations.find(r => r.id === reservationId);
+    if (!reservation) {
+      console.error('Reservation not found');
+      return;
+    }
+    
+    // Prepare the update data
+    const updateData = {
+      ...editedData
+    };
+    
+    // If customer info was edited, update the user as well
+    if (editedData.customer_name || editedData.customer_phone || editedData.customer_company) {
+      const user = getUserById(reservation.user_id);
+      if (user) {
+        // Optionally update user data
+        // await User.update(user.id, {
+        //   full_name: editedData.customer_name || user.full_name,
+        //   phone: editedData.customer_phone || user.phone,
+        //   company_name: editedData.customer_company || user.company_name
+        // });
+      }
+      
+      // Don't include these in reservation update
+      delete updateData.customer_name;
+      delete updateData.customer_phone;
+      delete updateData.customer_company;
+    }
+    
+    // Update reservation directly
+    await Reservation.update(reservationId, updateData);
+    
+    setEditingFull(null);
+    setEditedData({});
+    
+    // Call the parent update function to reload data
+    if (onReservationUpdate) {
+      onReservationUpdate(); // Just trigger reload, no parameters needed
+    }
+  } catch (error) {
+    console.error('Error updating reservation:', error);
+  }
+};
+
+const addPaymentToReservation = async (reservationId, paymentAmount) => {
+  try {
+    const reservation = reservations.find(r => r.id === reservationId);
+    const currentPaid = parseFloat(reservation.amount_paid) || 0;
+    const newAmountPaid = currentPaid + parseFloat(paymentAmount);
+    const totalAmount = parseFloat(reservation.total_amount) || 0;
+    
+    let paymentStatus = 'unpaid';
+    if (newAmountPaid >= totalAmount && totalAmount > 0) {
+      paymentStatus = 'paid';
+    } else if (newAmountPaid > 0) {
+      paymentStatus = 'partial';
+    }
+    
+    await Reservation.update(reservationId, {
+      amount_paid: newAmountPaid,
+      payment_status: paymentStatus
+    });
+    
+    onReservationUpdate();
+  } catch (error) {
+    console.error('Error adding payment:', error);
+  }
+};
 
   if (reservations.length === 0) {
     return (
@@ -208,51 +291,142 @@ export default function ReservationsList({
               </div>
               
               <div className="flex flex-wrap gap-3 rtl:space-x-reverse">
-                <Badge 
-                  className={`${statusColors[reservation.status]?.bg} ${statusColors[reservation.status]?.text} ${statusColors[reservation.status]?.border} border px-3 py-1 font-semibold`}
-                >
-                  {t(reservation.status)}
-                </Badge>
-                <Badge 
-                  className={`${paymentStatusColors[reservation.payment_status]?.bg} ${paymentStatusColors[reservation.payment_status]?.text} ${paymentStatusColors[reservation.payment_status]?.border} border px-3 py-1 font-semibold`}
-                >
-                  {t(reservation.payment_status)}
-                </Badge>
-                <PDFExporter 
-                  reservation={reservation}
-                  vehicle={vehicle}
-                  user={user}
-                  language={language}
-                />
-              </div>
+  <Badge 
+    className={`${statusColors[reservation.status]?.bg} ${statusColors[reservation.status]?.text} ${statusColors[reservation.status]?.border} border px-3 py-1 font-semibold`}
+  >
+    {t(reservation.status)}
+  </Badge>
+  <Badge 
+    className={`${paymentStatusColors[reservation.payment_status]?.bg} ${paymentStatusColors[reservation.payment_status]?.text} ${paymentStatusColors[reservation.payment_status]?.border} border px-3 py-1 font-semibold`}
+  >
+    {t(reservation.payment_status)}
+  </Badge>
+  {editingFull === reservation.id ? (
+    <>
+      <Button 
+        onClick={() => updateReservationFull(reservation.id)}
+        className="bg-green-600 hover:bg-green-700 text-white"
+        size="sm"
+      >
+        <Save className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+        {language === 'ar' ? 'حفظ' : language === 'he' ? 'שמור' : 'Save'}
+      </Button>
+      <Button 
+        onClick={() => {
+          setEditingFull(null);
+          setEditedData({});
+        }}
+        variant="outline"
+        size="sm"
+      >
+        <X className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+        {language === 'ar' ? 'إلغاء' : language === 'he' ? 'ביטול' : 'Cancel'}
+      </Button>
+    </>
+  ) : (
+    <>
+      <Button 
+  onClick={() => {
+    const startDatetime = reservation.start_datetime ? 
+      new Date(reservation.start_datetime).toISOString().slice(0, 16) : '';
+    
+    setEditingFull(reservation.id);
+    setEditedData({
+      pickup_location: reservation.pickup_location || '',
+      delivery_location: reservation.delivery_location || '',
+      start_datetime: startDatetime,
+      duration_hours: reservation.duration_hours || 0,
+      total_amount: reservation.total_amount || 0,
+      amount_paid: reservation.amount_paid || 0,
+      // Store customer info separately
+      customer_name: user?.full_name || '',
+      customer_phone: user?.phone || '',
+      customer_company: user?.company_name || ''
+    });
+  }}
+  variant="outline"
+  size="sm"
+>
+        <Edit className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+        {language === 'ar' ? 'تعديل' : language === 'he' ? 'ערוך' : 'Edit'}
+      </Button>
+      <Button 
+        onClick={() => deleteReservation(reservation.id)} 
+        variant="destructive"
+        size="sm"
+      >
+        <X className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+        {language === 'ar' ? 'حذف' : language === 'he' ? 'מחק' : 'Delete'}
+      </Button>
+    </>
+  )}
+  <PDFExporter 
+    reservation={reservation}
+    vehicle={vehicle}
+    user={user}
+    language={language}
+  />
+</div>
             </div>
             
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
               {/* Customer & Vehicle Info */}
               <div className="space-y-6">
                 <div className="bg-gray-50 p-5 rounded-xl">
-                  <h4 className="font-bold text-gray-900 flex items-center mb-4 rtl:space-x-reverse">
-                    <User className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
-                    {language === 'ar' ? 'معلومات العميل' : language === 'he' ? 'פרטי לקוח' : 'Customer Info'}
-                  </h4>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between rtl:space-x-reverse">
-                      <span className="text-gray-600 font-medium">{t('name')}</span>
-                      <span className="font-bold text-gray-900">{user?.full_name}</span>
-                    </div>
-                    <div className="flex items-center justify-between rtl:space-x-reverse">
-                      <span className="text-gray-600 font-medium">{t('phone')}</span>
-                      <span className="font-bold text-gray-900" dir="ltr">{normalizePhoneNumber(user?.phone)}</span>
-                    </div>
-                    {user?.company_name && (
-                      <div className="flex items-center justify-between rtl:space-x-reverse">
-                        <span className="text-gray-600 font-medium">{t('company')}</span>
-                        <span className="font-bold text-gray-900">{user.company_name}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+  <h4 className="font-bold text-gray-900 flex items-center mb-4 rtl:space-x-reverse">
+    <User className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+    {language === 'ar' ? 'معلومات العميل' : language === 'he' ? 'פרטי לקוח' : 'Customer Info'}
+  </h4>
+  
+  <div className="space-y-3">
+    {editingFull === reservation.id ? (
+      <>
+        <div>
+          <label className="text-gray-600 font-medium text-sm">{t('name')}</label>
+          <Input
+            value={editedData.customer_name !== undefined ? editedData.customer_name : user?.full_name || ''}
+            onChange={(e) => setEditedData({...editedData, customer_name: e.target.value})}
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <label className="text-gray-600 font-medium text-sm">{t('phone')}</label>
+          <Input
+            value={editedData.customer_phone !== undefined ? editedData.customer_phone : user?.phone || ''}
+            onChange={(e) => setEditedData({...editedData, customer_phone: e.target.value})}
+            className="mt-1"
+            dir="ltr"
+          />
+        </div>
+        <div>
+          <label className="text-gray-600 font-medium text-sm">{t('company')}</label>
+          <Input
+            value={editedData.customer_company !== undefined ? editedData.customer_company : user?.company_name || ''}
+            onChange={(e) => setEditedData({...editedData, customer_company: e.target.value})}
+            className="mt-1"
+          />
+        </div>
+      </>
+    ) : (
+      <>
+        <div className="flex items-center justify-between rtl:space-x-reverse">
+          <span className="text-gray-600 font-medium">{t('name')}</span>
+          <span className="font-bold text-gray-900">{user?.full_name}</span>
+        </div>
+        <div className="flex items-center justify-between rtl:space-x-reverse">
+          <span className="text-gray-600 font-medium">{t('phone')}</span>
+          <span className="font-bold text-gray-900" dir="ltr">{normalizePhoneNumber(user?.phone)}</span>
+        </div>
+        {user?.company_name && (
+          <div className="flex items-center justify-between rtl:space-x-reverse">
+            <span className="text-gray-600 font-medium">{t('company')}</span>
+            <span className="font-bold text-gray-900">{user.company_name}</span>
+          </div>
+        )}
+      </>
+    )}
+  </div>
+</div>
 
                 <div className="bg-blue-50 p-5 rounded-xl">
                   <h5 className="font-bold text-gray-900 mb-3">
@@ -267,128 +441,230 @@ export default function ReservationsList({
               </div>
 
               {/* Booking Details */}
-              <div className="space-y-6">
-                <div className="bg-gray-50 p-5 rounded-xl">
-                  <h4 className="font-bold text-gray-900 flex items-center mb-4 rtl:space-x-reverse">
-                    <Calendar className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
-                    {language === 'ar' ? 'تفاصيل الحجز' : language === 'he' ? 'פרטי הזמנה' : 'Booking Details'}
-                  </h4>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between rtl:space-x-reverse">
-                      <span className="text-gray-600 font-medium">{t('date')}</span>
-                      <span className="font-bold text-gray-900">
-                        {format(startDateTime, 'yyyy/MM/dd')}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between rtl:space-x-reverse">
-                      <span className="text-gray-600 font-medium">{t('time')}</span>
-                      <span className="font-bold text-gray-900">
-                        {format(startDateTime, 'HH:mm')} - {format(endDateTime, 'HH:mm')}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between rtl:space-x-reverse">
-                      <span className="text-gray-600 font-medium">{t('duration')}</span>
-                      <span className="font-bold text-gray-900">
-                        {reservation.duration_hours} {language === 'ar' ? 'ساعات' : language === 'he' ? 'שעות' : 'hours'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
+             {/* Booking Details */}
+<div className="space-y-6">
+  <div className="bg-gray-50 p-5 rounded-xl">
+    <h4 className="font-bold text-gray-900 flex items-center mb-4 rtl:space-x-reverse">
+      <Calendar className="w-5 h-5 mr-2 rtl:ml-2 rtl:mr-0" />
+      {language === 'ar' ? 'تفاصيل الحجز' : language === 'he' ? 'פרטי הזמנה' : 'Booking Details'}
+    </h4>
+    
+    <div className="space-y-3">
+      {editingFull === reservation.id ? (
+        <>
+          <div>
+            <label className="text-gray-600 font-medium text-sm">{t('date')} & {t('time')}</label>
+            <Input
+              type="datetime-local"
+value={editedData.start_datetime || (reservation.start_datetime ? 
+  new Date(reservation.start_datetime).toISOString().slice(0, 16) : '')}
+                onChange={(e) => setEditedData({...editedData, start_datetime: e.target.value})}
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <label className="text-gray-600 font-medium text-sm">{t('duration')} ({language === 'ar' ? 'ساعات' : language === 'he' ? 'שעות' : 'hours'})</label>
+            <Input
+              type="number"
+              value={editedData.duration_hours !== undefined ? editedData.duration_hours : (reservation.duration_hours || 0)}
+              onChange={(e) => setEditedData({...editedData, duration_hours: parseFloat(e.target.value)})}
+              className="mt-1"
+              min="0.5"
+              step="0.5"
+            />
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="flex items-center justify-between rtl:space-x-reverse">
+            <span className="text-gray-600 font-medium">{t('date')}</span>
+            <span className="font-bold text-gray-900">
+              {format(startDateTime, 'yyyy/MM/dd')}
+            </span>
+          </div>
+          <div className="flex items-center justify-between rtl:space-x-reverse">
+            <span className="text-gray-600 font-medium">{t('time')}</span>
+            <span className="font-bold text-gray-900">
+              {format(startDateTime, 'HH:mm')} - {format(endDateTime, 'HH:mm')}
+            </span>
+          </div>
+          <div className="flex items-center justify-between rtl:space-x-reverse">
+            <span className="text-gray-600 font-medium">{t('duration')}</span>
+            <span className="font-bold text-gray-900">
+              {reservation.duration_hours} {language === 'ar' ? 'ساعات' : language === 'he' ? 'שעות' : 'hours'}
+            </span>
+          </div>
+        </>
+      )}
+    </div>
+  </div>
 
-                <div className="space-y-4">
-                  <div className="flex items-start justify-between text-sm bg-green-50 p-4 rounded-xl rtl:space-x-reverse">
-                    <span className="text-gray-700 flex items-center font-medium">
-                      <MapPin className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
-                      {t('from')}
-                    </span>
-                    <span className="font-bold text-gray-900 text-right rtl:text-left max-w-40">
-                      {reservation.pickup_location}
-                    </span>
-                  </div>
-                  <div className="flex items-start justify-between text-sm bg-red-50 p-4 rounded-xl rtl:space-x-reverse">
-                    <span className="text-gray-700 flex items-center font-medium rtl:space-x-reverse" >
-                      <MapPin className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
-                      {t('to')}
-                    </span>
-                    <span className="font-bold text-gray-900 text-right rtl:text-left max-w-40">
-                      {reservation.delivery_location}
-                    </span>
-                  </div>
-                </div>
-              </div>
+  <div className="space-y-4">
+    {editingFull === reservation.id ? (
+      <>
+        <div>
+          <label className="text-gray-700 flex items-center font-medium text-sm mb-2">
+            <MapPin className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+            {t('from')}
+          </label>
+          <Input
+            value={editedData.pickup_location !== undefined ? editedData.pickup_location : reservation.pickup_location}
+            onChange={(e) => setEditedData({...editedData, pickup_location: e.target.value})}
+            className="w-full"
+          />
+        </div>
+        <div>
+          <label className="text-gray-700 flex items-center font-medium text-sm mb-2">
+            <MapPin className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+            {t('to')}
+          </label>
+          <Input
+            value={editedData.delivery_location !== undefined ? editedData.delivery_location : reservation.delivery_location}
+            onChange={(e) => setEditedData({...editedData, delivery_location: e.target.value})}
+            className="w-full"
+          />
+        </div>
+      </>
+    ) : (
+      <>
+        <div className="flex items-start justify-between text-sm bg-green-50 p-4 rounded-xl rtl:space-x-reverse">
+          <span className="text-gray-700 flex items-center font-medium">
+            <MapPin className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+            {t('from')}
+          </span>
+          <span className="font-bold text-gray-900 text-right rtl:text-left max-w-40">
+            {reservation.pickup_location}
+          </span>
+        </div>
+        <div className="flex items-start justify-between text-sm bg-red-50 p-4 rounded-xl rtl:space-x-reverse">
+          <span className="text-gray-700 flex items-center font-medium rtl:space-x-reverse">
+            <MapPin className="w-4 h-4 mr-1 rtl:ml-1 rtl:mr-0" />
+            {t('to')}
+          </span>
+          <span className="font-bold text-gray-900 text-right rtl:text-left max-w-40">
+            {reservation.delivery_location}
+          </span>
+        </div>
+      </>
+    )}
+  </div>
+</div>
 
               {/* Financial & Actions */}
               <div className="space-y-6">
-                <div className="bg-gradient-to-br from-green-50 to-blue-50 p-5 rounded-xl">
-                  <div className="flex items-center justify-between mb-4">
-                    <h4 className="font-bold text-gray-900">
-                      {language === 'ar' ? 'التفاصيل المالية' : language === 'he' ? 'פרטים פיננסים' : 'Financial Details'}
-                    </h4>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditingFinancials(editingFinancials === reservation.id ? null : reservation.id)}
-                      className="p-2 hover:bg-white/50 rounded-lg"
-                    >
-                      {editingFinancials === reservation.id ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
-                    </Button>
-                  </div>
-                  
-                  {editingFinancials === reservation.id ? (
-                    <div className="space-y-3">
-                      <Input
-                        type="number"
-                        defaultValue={reservation.total_amount}
-                        placeholder={t('total_amount')}
-                        className="rounded-lg"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            updateFinancials(reservation.id, {
-                              total_amount: e.target.value,
-                              amount_paid: reservation.amount_paid || 0
-                            });
-                          }
-                        }}
-                      />
-                      <Input
-                        type="number"
-                        defaultValue={reservation.amount_paid || 0}
-                        placeholder={t('amount_paid')}
-                        className="rounded-lg"
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            updateFinancials(reservation.id, {
-                              total_amount: reservation.total_amount,
-                              amount_paid: e.target.value
-                            });
-                          }
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600 font-medium">{t('total_amount')}</span>
-                        <span className="font-bold text-gray-900">
-                          {reservation.total_amount} {t('currency')}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-600 font-medium">{t('amount_paid')}</span>
-                        <span className="font-bold text-green-600">
-                          {reservation.amount_paid || 0} {t('currency')}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between pt-2 border-t">
-                        <span className="font-bold text-gray-900">{t('remaining')}</span>
-                        <span className={`font-bold text-xl ${remainingAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>
-                          {remainingAmount} {t('currency')}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+  <div className="bg-gradient-to-br from-green-50 to-blue-50 p-5 rounded-xl">
+    <div className="flex items-center justify-between mb-4">
+      <h4 className="font-bold text-gray-900">
+        {language === 'ar' ? 'التفاصيل المالية' : language === 'he' ? 'פרטים פיננסים' : 'Financial Details'}
+      </h4>
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => setEditingFinancials(editingFinancials === reservation.id ? null : reservation.id)}
+        className="p-2 hover:bg-white/50 rounded-lg"
+      >
+        {editingFinancials === reservation.id ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
+      </Button>
+    </div>
+    
+    {editingFinancials === reservation.id ? (
+      <div className="space-y-3">
+        <div>
+          <label className="text-gray-600 font-medium text-sm">{t('total_amount')}</label>
+          <Input
+            type="number"
+            defaultValue={reservation.total_amount || 0}
+            placeholder={t('total_amount')}
+            className="rounded-lg mt-1"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                updateFinancials(reservation.id, {
+                  total_amount: e.target.value,
+                  amount_paid: reservation.amount_paid || 0
+                });
+              }
+            }}
+          />
+        </div>
+        <div>
+          <label className="text-gray-600 font-medium text-sm">{t('amount_paid')}</label>
+          <Input
+            type="number"
+            defaultValue={reservation.amount_paid || 0}
+            placeholder={t('amount_paid')}
+            className="rounded-lg mt-1"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                updateFinancials(reservation.id, {
+                  total_amount: reservation.total_amount,
+                  amount_paid: e.target.value
+                });
+              }
+            }}
+          />
+        </div>
+        <div className="border-t pt-3">
+          <label className="text-gray-600 font-medium text-sm mb-2 block">
+            {language === 'ar' ? 'إضافة دفعة' : language === 'he' ? 'הוסף תשלום' : 'Add Payment'}
+          </label>
+          <div className="flex gap-2">
+            <Input
+              type="number"
+              placeholder={language === 'ar' ? 'المبلغ' : language === 'he' ? 'סכום' : 'Amount'}
+              className="rounded-lg"
+              id={`payment-${reservation.id}`}
+              min="0"
+            />
+            <Button
+              size="sm"
+              className="bg-green-600 hover:bg-green-700 text-white"
+              onClick={() => {
+                const input = document.getElementById(`payment-${reservation.id}`);
+                const amount = parseFloat(input.value);
+                if (amount > 0) {
+                  addPaymentToReservation(reservation.id, amount);
+                  input.value = '';
+                  setEditingFinancials(null);
+                }
+              }}
+            >
+              {language === 'ar' ? 'إضافة' : language === 'he' ? 'הוסף' : 'Add'}
+            </Button>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-gray-600 font-medium">{t('total_amount')}</span>
+          <span className="font-bold text-gray-900">
+            {reservation.total_amount} {t('currency')}
+          </span>
+        </div>
+        <div className="flex items-center justify-between">
+          <span className="text-gray-600 font-medium">{t('amount_paid')}</span>
+          <span className="font-bold text-green-600">
+            {reservation.amount_paid || 0} {t('currency')}
+          </span>
+        </div>
+        <div className="flex items-center justify-between pt-2 border-t">
+          <span className="font-bold text-gray-900">{t('remaining')}</span>
+          <span className={`font-bold text-xl ${remainingAmount > 0 ? 'text-red-600' : 'text-green-600'}`}>
+            {remainingAmount} {t('currency')}
+          </span>
+        </div>
+        {/* Quick Add Payment Button */}
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full mt-2 border-green-600 text-green-700 hover:bg-green-50"
+          onClick={() => setEditingFinancials(reservation.id)}
+        >
+          {language === 'ar' ? 'إضافة دفعة' : language === 'he' ? 'הוסף תשלום' : 'Add Payment'}
+        </Button>
+      </div>
+    )}
+  </div>
 
                 {/* Status Management */}
                 <div className="space-y-3">

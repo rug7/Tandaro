@@ -88,21 +88,28 @@ export default function AdminDashboard() {
   };
 
 
-  const handleReservationUpdate = async (reservationId, updates) => {
-    try {
+const handleReservationUpdate = async (reservationId, updates) => {
+  try {
+    // Handle both cases: with updates (from other components) and without (just reload)
+    if (reservationId && updates) {
+      // Direct update with specific changes
       await Reservation.update(reservationId, updates);
       
       const reservation = reservations.find(r => r.id === reservationId);
-      const vehicle = vehicles.find(v => v.id === reservation.vehicle_id);
-      const user = users.find(u => u.id === reservation.user_id);
-      
-      await addReservationToSheet({...reservation, ...updates}, vehicle, user);
-      
-      loadData();
-    } catch (error) {
-      console.error('Error updating reservation:', error);
+      if (reservation) {
+        const vehicle = vehicles.find(v => v.id === reservation.vehicle_id);
+        const user = users.find(u => u.id === reservation.user_id);
+        
+        await addReservationToSheet({...reservation, ...updates}, vehicle, user);
+      }
     }
-  };
+    
+    // Always reload data (whether update was made or just a refresh request)
+    loadData();
+  } catch (error) {
+    console.error('Error updating reservation:', error);
+  }
+};
 
   const filteredReservations = reservations.filter(reservation => {
     const matchesSearch = reservation.pickup_location?.toLowerCase().includes(searchTerm.toLowerCase()) ||

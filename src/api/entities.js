@@ -337,6 +337,18 @@ update: async (id, data) => {
     console.error('Error updating reservation:', error);
     throw error;
   }
+},
+delete: async (id) => {
+  try {
+    if (!id) {
+      throw new Error('Reservation ID is required for deletion');
+    }
+    await deleteDoc(doc(db, "reservations", id));
+    return true;
+  } catch (error) {
+    console.error("Delete reservation error:", error);
+    throw error;
+  }
 }
 };
 
